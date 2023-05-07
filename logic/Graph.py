@@ -1,6 +1,15 @@
+import base64
+import binascii
+import os
 from collections import deque
+
+from fastapi import FastAPI
+
 from logic.Edge import Edge
 from logic.Node import Node
+from logic.UnreliableGraph import UnreliableGraph
+
+app = FastAPI()
 
 
 class Graph:
@@ -234,7 +243,7 @@ class Graph:
         :param filename: Nombre del fichero
         :return: None
         """
-        with open("../" + filename + '.txt', 'w') as file:
+        with open("../" + filename + ".txt", 'w') as file:
             for node in self.nodes:
                 file.write(node.info + " ")
                 for edge in node.edges:
@@ -268,3 +277,78 @@ class Graph:
                     else:
                         raise Exception(f"El nodo {dicts[key][i]} no pertenece al grafo")
         return graph
+
+    def export_graph(self, filename: str):
+        """
+        Exporta un grafo a un archivo txt
+        :param filename: El nombre del archivo de texto
+        :return:
+        """
+        os.makedirs("../", exist_ok=True)
+        with open("../" + filename + ".txt", 'w') as file:
+            file.write(base64.b64encode("python_project directed_graph".encode("utf-8")).decode('utf-8'))
+            file.write('\n')
+            it = iter(self.nodes)
+            while True:
+                try:
+                    starting_node = next(it)
+                    line: str
+                    line = "".join([starting_node.info])
+                    it2 = iter(starting_node.edges)
+                    while True:
+                        try:
+                            edge = next(it2)
+                            node_adjacent = edge.node
+                            line = "".join([line, " , ", str(edge.weight), " , ", node_adjacent.info])
+                        except StopIteration:
+                            file.write(f"{base64.b64encode(line.encode('utf-8')).decode('utf-8')}\n")
+                            break
+                except StopIteration:
+                    break
+        os.chmod("../" + filename + ".txt", 0o444)
+
+    @staticmethod
+    def import_graph(filename: str):
+
+        """
+        Importa un grafo (exportado a un fichero texto previamente) dado su direccion y nombre
+        -En caso de no encontrarse el fichero en la direccion y nombre especificados lanzara la excepcion
+        FileNotFoundError
+        -En caso de importar un fichero que no haya sido exportado por el metodo export_graph() o que no contenga la
+        estructura definida lanzara la excepcion UnreliableGraph que indica que el grafo que se desea importar no
+        es confiable
+        :param filename: El nombre del archivo de texto
+        :return:
+        """
+        graph = Graph()
+        try:
+            with open("../" + filename + ".txt", 'r') as file:
+                flag = True
+                line = file.readline()
+                decode_line = base64.b64decode(line).decode('utf-8')
+                if decode_line == "python_project directed_graph":
+                    while line:
+                        line = file.readline()
+                        decode_line = base64.b64decode(line).decode('utf-8')
+                        info: deque = deque(decode_line.split(" , "))
+                        it = iter(info)
+                        starting_node: str
+                        while True:
+                            try:
+                                if flag:
+                                    starting_node = next(it)
+                                    graph.insert_node(starting_node)
+                                    flag = False
+                                else:
+                                    im = next(it)
+                                    weight = int(im)
+                                    adjacent_node = next(it)
+                                    graph.insert_node(adjacent_node)
+                                    graph.insert_edge(starting_node, adjacent_node, weight)
+                            except StopIteration:
+                                flag = True
+                                break
+        except binascii.Error:
+            raise UnreliableGraph
+        except FileNotFoundError:
+            raise FileNotFoundError

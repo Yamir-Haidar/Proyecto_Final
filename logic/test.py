@@ -21,8 +21,10 @@ grafo.insert_edge("C", "D")
 # for i in grafo.get_node("A").get_adjacent():
 #     print(i)
 # grafo.save("plastilina")
-grafo.save("test")
-grafo = Graph.load("test")
+# grafo.save("test")
+# grafo = Graph.load("test")
+# grafo.export_graph("pan")
+grafo = Graph.import_graph("pan")
 for item in grafo.nodes:
     print(item, end=" ")
     for edge in item.edges:
