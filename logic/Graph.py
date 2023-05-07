@@ -2,14 +2,9 @@ import base64
 import binascii
 import os
 from collections import deque
-
-from fastapi import FastAPI
-
 from logic.Edge import Edge
 from logic.Node import Node
 from logic.UnreliableGraph import UnreliableGraph
-
-app = FastAPI()
 
 
 class Graph:
