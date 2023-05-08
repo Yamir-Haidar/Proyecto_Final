@@ -12,14 +12,14 @@ const MainGraph = () => {
   const [linking, setLinking] = useState<IdType | null>(null);
   const [graph, setGraph] = useState<graphData>({
       nodes: [
-        { id: 1, label: "Node 1", title: "node 1 tootip text" },
+        { id: 1, label: "Node 1", title: "node 1 tootip text", shadow: true, shape: 'circle' },
         { id: 2, label: "Node 2", title: "node 2 tootip text" },
         { id: 3, label: "Node 3", title: "node 3 tootip text" },
         { id: 4, label: "Node 4", title: "node 4 tootip text" },
         { id: 5, label: "Node 5", title: "node 5 tootip text" }
       ],
       edges: [
-        { from: 1, to: 2 },
+        { from: 1, to: 2, shadow: true },
         { from: 1, to: 3 },
         { from: 2, to: 4 },
         { from: 2, to: 5 },
@@ -79,7 +79,7 @@ const MainGraph = () => {
       if (linking) {
         if (event.nodes[0]) {
           setGraph((g)=>{
-            const newEdges = [...g.edges, {from: linking, to: event.nodes[0]}];
+            const newEdges = [...g.edges, {from: linking, to: event.nodes[0], shadow: true}];
             return {...g, edges: newEdges};
           })
         }
