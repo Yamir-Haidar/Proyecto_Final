@@ -6,3 +6,8 @@
 pip install -r requirements.txt
 ```
 
+### Mount backend
+```sh
+uvicorn main:app --reload
+```
+
