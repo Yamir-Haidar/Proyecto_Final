@@ -1,12 +1,15 @@
 import React, { useRef, useState } from 'react'
 import Graph, { Network, Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
+import { notification } from 'antd'
+import { IdType } from 'vis';
 
 const MainGraph = () => {
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
     {x: 0, y: 0, visible: false, options:[]}
   );
   const graphRef = useRef<Graph>(null);
+  const [linking, setLinking] = useState<IdType | null>(null);
   const [graph, setGraph] = useState<graphData>({
       nodes: [
         { id: 1, label: "Node 1", title: "node 1 tootip text" },
@@ -34,22 +37,54 @@ const MainGraph = () => {
       height: "100%"
     };
 
-  const removeNode = (node: number) => {
-    console.log(node);
+  const removeNode = (node: IdType) => {
     graphRef.current?.Network.deleteSelected();
+    notification.success({message: 'Successfully node deleted'});
+  }
+
+  const preLinkNode = (node: IdType) => {
+    setLinking(node);
+    if (graphRef.current) {
+      graphRef.current.container.current.setAttribute('style', 'cursor: pointer');
+    }
+  }
+
+  const removeEdge = (edge: IdType) => {
+    graphRef.current?.Network.deleteSelected();
+    notification.success({message: 'Successfully edge deleted'});
   }
 
   const events: graphEvents = {
     oncontext: function(event: any) {
       event.event.preventDefault()
       const {x, y} = event.pointer.DOM;
-      console.log(event)
       if (graphRef.current) {
         const node = graphRef.current.Network.getNodeAt({x: x, y: y});
         if (node) {
           graphRef.current.Network.selectNodes([node]);
-          setFloatOptions({visible:true, x: x, y: y, options: [{label: 'Delete', click: ()=>removeNode(Number(node))}]})
+          setFloatOptions({visible:true, x: x, y: y, options: [
+            {label: 'Link', click: ()=>preLinkNode(node)},
+            {label: 'Delete', click: ()=>removeNode(node)},
+          ]})
+        } else {
+          const edge = graphRef.current.Network.getEdgeAt({x: x, y: y});
+          if (edge) {
+            graphRef.current.Network.selectEdges([edge]);
+            setFloatOptions({visible:true, x: x, y: y, options: [{label: 'Delete', click: ()=>removeEdge(edge)}]})
+          }
         }
+      }
+    },
+    select: (event: any) => {
+      if (linking) {
+        if (event.nodes[0]) {
+          setGraph((g)=>{
+            const newEdges = [...g.edges, {from: linking, to: event.nodes[0]}];
+            return {...g, edges: newEdges};
+          })
+        }
+        setLinking(null);
+        graphRef.current?.container.current.setAttribute('style', 'cursor: arrow');
       }
     }
   };
@@ -62,8 +97,6 @@ const MainGraph = () => {
           events={events}
           getNetwork={network => {
             //  if you want access to vis.js network api you can set the state in a parent component using this property
-            console.log(network)
-            console.log(network.getNodeAt)
           }}
         />
         <FloatOptions {...floatOptions} onCancel={()=>setFloatOptions({visible: false, x: 0, y: 0, options: []})}/>

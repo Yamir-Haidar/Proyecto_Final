@@ -35,6 +35,7 @@ declare module "react-graph-vis" {
       NetworkGraphState
     > {
       Network: Network;
+      container: {current: HTMLDivElement};
       render();
     }
   }
