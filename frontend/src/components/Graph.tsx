@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react'
-import Graph, { Network, Options, graphData, graphEvents } from "react-graph-vis";
+import React, { useRef, useState, useEffect } from 'react'
+import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
 import { notification } from 'antd'
 import { IdType } from 'vis';
+import { getNodes } from '../services/apiServices';
 
 const MainGraph = () => {
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
@@ -41,6 +42,13 @@ const MainGraph = () => {
     graphRef.current?.Network.deleteSelected();
     notification.success({message: 'Successfully node deleted'});
   }
+
+  useEffect(() => {
+    getNodes()
+    .then((data)=>console.log(data))
+    .catch((error)=>console.log(error))
+  }, [])
+  
 
   const preLinkNode = (node: IdType) => {
     setLinking(node);
