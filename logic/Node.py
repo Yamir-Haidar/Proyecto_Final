@@ -9,14 +9,14 @@ class Node:
     def __str__(self):
         return self.info
 
-    def get_edge(self, info) -> Edge:
+    def get_edge(self, info, weight: int) -> Edge:
         edge = None
         it = iter(self.edges)
-        while True:
+        while it:
             try:
                 aux = next(it)
                 node = aux.node
-                if node.info == info:
+                if node.info == info and aux.weight == weight:
                     edge = aux
                     break
             except StopIteration:
@@ -26,7 +26,7 @@ class Node:
     def get_adjacent(self) -> list:
         adjacent = []
         it = iter(self.edges)
-        while True:
+        while it:
             try:
                 edge = next(it)
                 adjacent.append(edge.node)
