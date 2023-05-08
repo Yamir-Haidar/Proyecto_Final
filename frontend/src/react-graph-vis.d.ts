@@ -34,6 +34,7 @@ declare module "react-graph-vis" {
       NetworkGraphProps,
       NetworkGraphState
     > {
+      Network: Network;
       render();
     }
   }

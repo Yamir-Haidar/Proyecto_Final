@@ -1,7 +1,12 @@
-import React, { useState } from 'react'
-import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
+import React, { useRef, useState } from 'react'
+import Graph, { Network, Options, graphData, graphEvents } from "react-graph-vis";
+import FloatOptions, { FloatOptionsProps } from './FloatOptions';
 
 const MainGraph = () => {
+  const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
+    {x: 0, y: 0, visible: false, options:[]}
+  );
+  const graphRef = useRef<Graph>(null);
   const [graph, setGraph] = useState<graphData>({
       nodes: [
         { id: 1, label: "Node 1", title: "node 1 tootip text" },
@@ -21,7 +26,7 @@ const MainGraph = () => {
   )
   const options: Options = {
       layout: {
-        hierarchical: true, 
+        hierarchical: false, 
       },
       edges: {
         color: "#000000"
@@ -29,20 +34,40 @@ const MainGraph = () => {
       height: "100%"
     };
 
+  const removeNode = (node: number) => {
+    console.log(node);
+    graphRef.current?.Network.deleteSelected();
+  }
+
   const events: graphEvents = {
-    select: function(event: any) {
-      var { nodes, edges } = event;
+    oncontext: function(event: any) {
+      event.event.preventDefault()
+      const {x, y} = event.pointer.DOM;
+      console.log(event)
+      if (graphRef.current) {
+        const node = graphRef.current.Network.getNodeAt({x: x, y: y});
+        if (node) {
+          graphRef.current.Network.selectNodes([node]);
+          setFloatOptions({visible:true, x: x, y: y, options: [{label: 'Delete', click: ()=>removeNode(Number(node))}]})
+        }
+      }
     }
   };
   return (
-    <Graph
-    graph={graph}
-    options={options}
-    events={events}
-    getNetwork={network => {
-      //  if you want access to vis.js network api you can set the state in a parent component using this property
-    }}
-  />
+    <div className='flex flex-1 h-full'>
+      <Graph
+          ref={graphRef}
+          graph={graph}
+          options={options}
+          events={events}
+          getNetwork={network => {
+            //  if you want access to vis.js network api you can set the state in a parent component using this property
+            console.log(network)
+            console.log(network.getNodeAt)
+          }}
+        />
+        <FloatOptions {...floatOptions} onCancel={()=>setFloatOptions({visible: false, x: 0, y: 0, options: []})}/>
+    </div>
   )
 }
 
