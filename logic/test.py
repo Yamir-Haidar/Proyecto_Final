@@ -8,6 +8,8 @@ grafo.insert_node("C")
 grafo.insert_node("D")
 # grafo.insert_node("E")
 grafo.insert_edge("A", "B")
+grafo.update_edge("A", "B", "C")
+grafo.delete_edge("A", "B", 1)
 grafo.insert_edge("A", "B")
 
 grafo.insert_edge("A", "C")
@@ -24,7 +26,7 @@ grafo.insert_edge("C", "D")
 # grafo.save("test")
 # grafo = Graph.load("test")
 # grafo.export_graph("pan")
-grafo = Graph.import_graph("pan")
+# grafo = Graph.import_graph("pan")
 for item in grafo.nodes:
     print(item, end=" ")
     for edge in item.edges:
