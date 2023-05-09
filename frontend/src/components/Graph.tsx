@@ -3,31 +3,20 @@ import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
 import { notification } from 'antd'
 import { IdType } from 'vis';
-import { getNodes } from '../services/apiServices';
+import { insertEdge } from '../services/apiServices';
 
-const MainGraph = () => {
+interface MainGraphProps {
+  graph: graphData;
+  reloadGraph: ()=>void;
+}
+
+const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
     {x: 0, y: 0, visible: false, options:[]}
   );
   const graphRef = useRef<Graph>(null);
   const [linking, setLinking] = useState<IdType | null>(null);
-  const [graph, setGraph] = useState<graphData>({
-      nodes: [
-        { id: 1, label: "Node 1", title: "node 1 tootip text", shadow: true, shape: 'circle' },
-        { id: 2, label: "Node 2", title: "node 2 tootip text" },
-        { id: 3, label: "Node 3", title: "node 3 tootip text" },
-        { id: 4, label: "Node 4", title: "node 4 tootip text" },
-        { id: 5, label: "Node 5", title: "node 5 tootip text" }
-      ],
-      edges: [
-        { from: 1, to: 2, shadow: true },
-        { from: 1, to: 3 },
-        { from: 2, to: 4 },
-        { from: 2, to: 5 },
-        { from: 5, to: 2 },
-      ]
-    }
-  )
+  
   const options: Options = {
       layout: {
         hierarchical: false, 
@@ -43,12 +32,11 @@ const MainGraph = () => {
     notification.success({message: 'Successfully node deleted'});
   }
 
-  useEffect(() => {
-    getNodes()
-    .then((data)=>console.log(data))
-    .catch((error)=>console.log(error))
-  }, [])
   
+  
+  useEffect(() => {
+    console.log(graph)
+  }, [graph])
 
   const preLinkNode = (node: IdType) => {
     setLinking(node);
@@ -86,10 +74,8 @@ const MainGraph = () => {
     select: (event: any) => {
       if (linking) {
         if (event.nodes[0]) {
-          setGraph((g)=>{
-            const newEdges = [...g.edges, {from: linking, to: event.nodes[0], shadow: true}];
-            return {...g, edges: newEdges};
-          })
+          insertEdge(String(linking), event.nodes[0]);
+          reloadGraph();
         }
         setLinking(null);
         graphRef.current?.container.current.setAttribute('style', 'cursor: arrow');

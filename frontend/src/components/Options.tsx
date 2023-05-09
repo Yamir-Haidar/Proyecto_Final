@@ -1,6 +1,11 @@
 import styled from '@emotion/styled';
-import { Button, Form, FormInstance, Input, Modal } from 'antd'
+import { Button, Form, FormInstance, Input, Modal, notification } from 'antd'
 import React, { useRef, useState } from 'react'
+import { insertNode } from '../services/apiServices';
+
+interface OptionsProps {
+  reloadGraph: ()=>void
+}
 
 const ModalStyled = styled(Modal)`
   .ant-btn-primary {
@@ -8,12 +13,19 @@ const ModalStyled = styled(Modal)`
   }
 `
 
-const Options = () => {
+const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
   const [currentModal, setCurrentModal] = useState<string>();
   const insertForm = useRef<FormInstance<any>>(null);
   const handleInsert = () => {
     insertForm.current?.validateFields()
     .then(()=>{
+      const info = insertForm.current?.getFieldValue('node_info');
+      insertNode(info)
+      .then(()=>{
+        reloadGraph();
+        notification.success({message: 'Successfully node inserted'});
+      })
+      .catch(()=>notification.error({message: 'Error inserting node'}));
       setCurrentModal(undefined);
     })
     .catch(()=>{});
