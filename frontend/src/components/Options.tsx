@@ -25,7 +25,7 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
         reloadGraph();
         notification.success({message: 'Successfully node inserted'});
       })
-      .catch(()=>notification.error({message: 'Error inserting node'}));
+      .catch((error)=>notification.error({message: error.response.data.detail}));
       setCurrentModal(undefined);
     })
     .catch(()=>{});

@@ -9,6 +9,9 @@ class Node:
     def __str__(self):
         return self.info
 
+    def __eq__(self, other) -> bool:
+        return self.info == other.info
+
     def get_edge(self, info, weight: int) -> Edge:
         edge = None
         it = iter(self.edges)
@@ -16,6 +19,7 @@ class Node:
             try:
                 aux = next(it)
                 node = aux.node
+                #TODO
                 if node.info == info and aux.weight == weight:
                     edge = aux
                     break
@@ -29,7 +33,8 @@ class Node:
         while it:
             try:
                 edge = next(it)
-                adjacent.append(edge.node)
+                if edge.node not in adjacent:
+                    adjacent.append(edge.node)
             except StopIteration:
                 break
         return adjacent

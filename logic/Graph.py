@@ -5,6 +5,7 @@ from collections import deque
 from logic.Edge import Edge
 from logic.Node import Node
 from logic.UnreliableGraph import UnreliableGraph
+from fastapi.exceptions import HTTPException
 
 
 class Graph:
@@ -38,6 +39,7 @@ class Graph:
         exists = False
         if self.existing_node(info):
             exists = True
+            raise HTTPException(status_code=400, detail="Im gay")
         else:
             node = Node(info)
             self.nodes.append(node)
@@ -67,6 +69,9 @@ class Graph:
                     edge = Edge(node2, weight)
                     node1.insert_edge(edge)
                     success = True
+                elif node2 in node1.get_adjacent:
+                    success = node1.get_edge(info2, weight) == Edge(info2, weight)
+                
         return success
 
     def update_node(self, old_info: str, new_info: str) -> bool:
