@@ -17,16 +17,9 @@ class Graph:
         result = {"nodes": [], "edges": []}
         for node in self.nodes:
             result["nodes"].append(node.info)
-        for node in self.nodes:
             for edge in node.edges:
-                result["edges"].append([self.get_initial_node(edge), edge.node.info, edge.weight])
+                result["edges"].append([node.info, edge.node.info, edge.weight])
         return result
-
-    def get_initial_node(self, edge: Edge):
-        for node in self.nodes:
-            for _edge in node.edges:
-                if _edge == edge:
-                    return node.info
 
     def insert_node(self, info: str) -> bool:
         """
@@ -36,18 +29,14 @@ class Graph:
                 :return: (True) En caso de insertar el nodo
                 :return: (False) En caso de no poder insertar el nodo dado que ya existia
                 """
-        exists = False
         if self.existing_node(info):
-            exists = True
             raise HTTPException(status_code=400, detail="Im gay")
-        else:
-            node = Node(info)
-            self.nodes.append(node)
-        return not exists
+        node = Node(info)
+        self.nodes.append(node)
+        return True
 
     def insert_edge(self, info1: str, info2: str, weight=1) -> bool:
         """
-
        Inserta una arista entre dos nodos
 
        :param info1: Info del nodo que sale la arista
@@ -60,7 +49,6 @@ class Graph:
               entre ambos nodos
 
        """
-        success = False
         node1 = self.get_node(info1)
         if node1 is not None:
             node2 = self.get_node(info2)
@@ -68,11 +56,14 @@ class Graph:
                 if node2 not in node1.get_adjacent():
                     edge = Edge(node2, weight)
                     node1.insert_edge(edge)
-                    success = True
-                elif node2 in node1.get_adjacent:
-                    success = node1.get_edge(info2, weight) == Edge(info2, weight)
-                
-        return success
+                    return True
+                else:
+                    raise HTTPException(status_code=400, detail=f"Edge {node1.info} -> {node2.info} already exists "
+                                                                f"with weight {node1.get_edge(node2.info)}")
+            else:
+                raise HTTPException(status_code=400, detail=f"Node {info2} not exists")
+        else:
+            raise HTTPException(status_code=400, detail=f"Node {info2} not exists")
 
     def update_node(self, old_info: str, new_info: str) -> bool:
         """
@@ -91,27 +82,22 @@ class Graph:
                 updated = True
         return updated
 
-    def update_edge(self, start: str, old_end: str, new_end: str, old_weight=1, new_weight=1) -> bool:
+    def update_edge(self, start: str, end: str, new_weight=1) -> bool:
         """
              Actualiza el peso una arista comprendida entre dos nodos
-
-             :param new_end: N
              :param new_weight:
              :param start: Info del nodo que sale la arista
-             :param old_end: Info del nodo al que apunta la arista
-             :param old_weight: Peso de la arista
+             :param end: Info del nodo al que apunta la arista
              :return: (True) En caso de que pudo actualizar el peso de la arista
              :return: (False) En caso de que no pudo actualizar el peso de la
              arista dado que no existe alguno de los nodos o la arista
         """
-        updated = False
-        edge = self.get_edge(start, old_end, old_weight)
+        edge = self.get_edge(start, end)
         if edge is not None:
-            if self.existing_node(new_end):
-                edge.weight = new_weight
-                edge.node = self.get_node(new_end)
-                updated = True
-        return updated
+            edge.weight = new_weight
+            edge.node = self.get_node(end)
+            return True
+        raise HTTPException(status_code=400, detail=f"Unfounded edge {start} -> {end}")
 
     def delete_node(self, info: str) -> bool:
         """
@@ -129,18 +115,16 @@ class Graph:
                 try:
                     node = next(it)
                     for edge in node.edges:
-                        self.delete_edge(node.get_info(), info, edge.weight)
+                        self.delete_edge(node.get_info(), info)
                 except StopIteration:
                     break
             self.nodes.remove(node_to_delete)
             deleted = True
         return deleted
 
-    def delete_edge(self, info1: str, info2: str, weight: int) -> bool:
+    def delete_edge(self, info1: str, info2: str) -> bool:
         """
             Elimina una arista comprendida entre dos nodos
-
-            :param weight: Peso de la arista
             :param info1: Info del nodo que sale la arista
             :param info2: Info del nodo al que apunta la arista
             :return: (True) En caso de que pudo eliminar la arista
@@ -148,7 +132,7 @@ class Graph:
             que no existe alguno de los nodos o la arista
         """
         deleted = False
-        edge = self.get_edge(info1, info2, weight)
+        edge = self.get_edge(info1, info2)
         if edge is not None:
             node1 = self.get_node(info1)
             node1.delete_edge(edge)
@@ -182,17 +166,15 @@ class Graph:
                 return True
         return False
 
-    def get_edge(self, info1: str, info2: str, weight: int) -> Edge:
+    def get_edge(self, info1: str, info2: str) -> Edge:
         """
             Retorna una arista comprendida entre dos nodos
-
-            :param weight: Peso de la arista
             :param info1: Info del nodo que sale la arista
             :param info2: Info del nodo al que apunta la arista
             :return: (None) En caso de no existir la arista o alguno de los nodos
         """
         node1 = self.get_node(info1)
-        edge = node1.get_edge(info2, weight)
+        edge = node1.get_edge(info2)
         return edge if node1 is not None and self.existing_node(info2) else None
 
     def get_node(self, info: str) -> Node:

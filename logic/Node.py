@@ -12,15 +12,14 @@ class Node:
     def __eq__(self, other) -> bool:
         return self.info == other.info
 
-    def get_edge(self, info, weight: int) -> Edge:
+    def get_edge(self, info) -> Edge:
         edge = None
         it = iter(self.edges)
         while it:
             try:
                 aux = next(it)
                 node = aux.node
-                #TODO
-                if node.info == info and aux.weight == weight:
+                if node.info == info:
                     edge = aux
                     break
             except StopIteration:
@@ -40,7 +39,9 @@ class Node:
         return adjacent
 
     def insert_edge(self, edge: Edge):
-        self.edges.append(edge)
+        if edge not in self.edges:
+            self.edges.append(edge)
+
 
     def delete_edge(self, edge: Edge):
         self.edges.remove(edge)
