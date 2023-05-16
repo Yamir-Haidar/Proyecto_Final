@@ -2,10 +2,10 @@ import base64
 import binascii
 import os
 from collections import deque
+
 from logic.Edge import Edge
 from logic.Node import Node
 from logic.UnreliableGraph import UnreliableGraph
-from fastapi.exceptions import HTTPException
 
 
 class Graph:
@@ -17,18 +17,11 @@ class Graph:
         result = {"nodes": [], "edges": []}
         for node in self.nodes:
             result["nodes"].append(node.info)
-        for node in self.nodes:
             for edge in node.edges:
-                result["edges"].append([self.get_initial_node(edge), edge.node.info, edge.weight])
+                result["edges"].append([node.info, edge.node.info, edge.weight])
         return result
 
-    def get_initial_node(self, edge: Edge):
-        for node in self.nodes:
-            for _edge in node.edges:
-                if _edge == edge:
-                    return node.info
-
-    def insert_node(self, info: str) -> bool:
+    def insert_node(self, info: str) -> None:
         """
                 Inserta un nodo al grafo dada su info
 
@@ -36,18 +29,13 @@ class Graph:
                 :return: (True) En caso de insertar el nodo
                 :return: (False) En caso de no poder insertar el nodo dado que ya existia
                 """
-        exists = False
         if self.existing_node(info):
-            exists = True
-            raise HTTPException(status_code=400, detail="Im gay")
-        else:
-            node = Node(info)
-            self.nodes.append(node)
-        return not exists
+            raise Exception(f"Node {info} already exists")
+        node = Node(info)
+        self.nodes.append(node)
 
-    def insert_edge(self, info1: str, info2: str, weight=1) -> bool:
+    def insert_edge(self, info1: str, info2: str, weight=1) -> None:
         """
-
        Inserta una arista entre dos nodos
 
        :param info1: Info del nodo que sale la arista
@@ -60,21 +48,16 @@ class Graph:
               entre ambos nodos
 
        """
-        success = False
         node1 = self.get_node(info1)
-        if node1 is not None:
-            node2 = self.get_node(info2)
-            if node2 is not None:
-                if node2 not in node1.get_adjacent():
-                    edge = Edge(node2, weight)
-                    node1.insert_edge(edge)
-                    success = True
-                elif node2 in node1.get_adjacent:
-                    success = node1.get_edge(info2, weight) == Edge(info2, weight)
-                
-        return success
+        if node1 is None:
+            raise Exception(f"Node {node1} not exists")
+        node2 = self.get_node(info2)
+        if node2 is None:
+            raise Exception(f"Node {node2} not exists")
+        edge = Edge(node2, weight)
+        node1.insert_edge(edge)
 
-    def update_node(self, old_info: str, new_info: str) -> bool:
+    def update_node(self, old_info: str, new_info: str) -> None:
         """
             Actualiza un nodo dada su info
 
@@ -83,37 +66,26 @@ class Graph:
             :return: (True) En caso de que pudo actualizar el nodo
             :return: (False)  En caso de que no pudo actualizar el nodo dado que no existe
         """
-        updated = False
         node = self.get_node(old_info)
-        if node is not None:
-            if not self.existing_node(new_info):
-                node.info = new_info
-                updated = True
-        return updated
+        if node is None:
+            raise Exception(f"Node {old_info} unfounded")
+        if self.existing_node(new_info):
+            raise Exception(f"Node {new_info} already exists")
+        node.info = new_info
 
-    def update_edge(self, start: str, old_end: str, new_end: str, old_weight=1, new_weight=1) -> bool:
-        """
-             Actualiza el peso una arista comprendida entre dos nodos
+    def update_edge(self, start: str, end: str, weight=1):
+        node1 = self.get_node(start)
+        if node1 not in self.nodes:
+            raise Exception(f"Node {start} not exists")
+        node2 = self.get_node(end)
+        if node2 not in self.nodes:
+            raise Exception(f"Node {end} not exists")
+        edge = Edge(node2, weight)
+        if edge in node1.edges:
+            raise Exception(f"Edge {start} -> {end} already exists")
+        node1.edges.append(edge)
 
-             :param new_end: N
-             :param new_weight:
-             :param start: Info del nodo que sale la arista
-             :param old_end: Info del nodo al que apunta la arista
-             :param old_weight: Peso de la arista
-             :return: (True) En caso de que pudo actualizar el peso de la arista
-             :return: (False) En caso de que no pudo actualizar el peso de la
-             arista dado que no existe alguno de los nodos o la arista
-        """
-        updated = False
-        edge = self.get_edge(start, old_end, old_weight)
-        if edge is not None:
-            if self.existing_node(new_end):
-                edge.weight = new_weight
-                edge.node = self.get_node(new_end)
-                updated = True
-        return updated
-
-    def delete_node(self, info: str) -> bool:
+    def delete_node(self, info: str) -> None:
         """
             Elimina un nodo dada su info
 
@@ -121,39 +93,27 @@ class Graph:
             :return: (True) En caso de que pudo eliminar el nodo
             :return: (False)  En caso de que no pudo eliminar el nodo dado que no existe
         """
-        deleted = False
         node_to_delete = self.get_node(info)
-        if node_to_delete is not None:
-            it = iter(self.nodes)
-            while it:
-                try:
-                    node = next(it)
-                    for edge in node.edges:
-                        self.delete_edge(node.get_info(), info, edge.weight)
-                except StopIteration:
-                    break
-            self.nodes.remove(node_to_delete)
-            deleted = True
-        return deleted
+        if node_to_delete is None:
+            raise Exception(f"Node {info} not exists")
+        it = iter(self.nodes)
+        while it:
+            try:
+                node = next(it)
+                if node_to_delete in node.edges:
+                    node.delete_edge(node.get_edge(info))
+            except StopIteration:
+                break
+        self.nodes.remove(node_to_delete)
 
-    def delete_edge(self, info1: str, info2: str, weight: int) -> bool:
-        """
-            Elimina una arista comprendida entre dos nodos
-
-            :param weight: Peso de la arista
-            :param info1: Info del nodo que sale la arista
-            :param info2: Info del nodo al que apunta la arista
-            :return: (True) En caso de que pudo eliminar la arista
-            :return: (False) En caso de que no pudo eliminar la arista dado
-            que no existe alguno de los nodos o la arista
-        """
-        deleted = False
-        edge = self.get_edge(info1, info2, weight)
-        if edge is not None:
-            node1 = self.get_node(info1)
-            node1.delete_edge(edge)
-            deleted = True
-        return deleted
+    def delete_edge(self, start: str, end: str):
+        node1 = self.get_node(start)
+        if node1 not in self.nodes:
+            raise Exception(f"Node {start} not exists")
+        node2 = self.get_node(end)
+        if node2 not in self.nodes:
+            raise Exception(f"Node {end} not exists")
+        node1.delete_edge(node1.get_edge(end))
 
     def existing_node(self, info: str) -> bool:
         """
@@ -163,37 +123,7 @@ class Graph:
             :return: (True) En caso de que exista el nodo
             :return: (False)  En caso de que no exista el nodo
          """
-        exists = False
-        if self.get_node(info) is not None:
-            exists = True
-        return exists
-
-    def existing_edge(self, start: str, end: str) -> bool:
-        """
-            Indica si existe una arista comprendida entre dos nodos
-
-            :param start: Info del nodo que sale la arista
-            :param end: Info del nodo al que apunta la arista
-            :return: (True) En caso de que exista la arista y los nodos
-            :return: (False) En caso de no existir la arista o alguno de los nodos
-         """
-        for edge in self.get_node(start).edges:
-            if edge.node.info == end:
-                return True
-        return False
-
-    def get_edge(self, info1: str, info2: str, weight: int) -> Edge:
-        """
-            Retorna una arista comprendida entre dos nodos
-
-            :param weight: Peso de la arista
-            :param info1: Info del nodo que sale la arista
-            :param info2: Info del nodo al que apunta la arista
-            :return: (None) En caso de no existir la arista o alguno de los nodos
-        """
-        node1 = self.get_node(info1)
-        edge = node1.get_edge(info2, weight)
-        return edge if node1 is not None and self.existing_node(info2) else None
+        return self.get_node(info) is not None
 
     def get_node(self, info: str) -> Node:
         """

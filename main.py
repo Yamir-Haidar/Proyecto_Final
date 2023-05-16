@@ -1,6 +1,7 @@
 from logic.Graph import Graph
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 graph = Graph()
 app = FastAPI()
@@ -21,32 +22,56 @@ async def get_nodes():
 
 @app.post("/insert_node")
 async def insert_node(info: str):
-    return graph.insert_node(info)
+    try:
+        graph.insert_node(info)
+        return JSONResponse(content={"message": "Edge inserted successfully"}, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/insert_edge")
 async def insert_edge(start: str, end: str, weight=1):
-    return graph.insert_edge(start, end, weight)
+    try:
+        graph.insert_edge(start, end, weight)
+        return JSONResponse(content={"message": "Edge inserted successfully"}, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/update_node")
 async def update_node(old_info: str, new_info: str):
-    return graph.update_node(old_info, new_info)
+    try:
+        graph.update_node(old_info, new_info)
+        return JSONResponse(content={"message": "Node updated successfully"}, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/update_edge")
-async def update_edge(start: str, old_end: str, new_end: str, old_weight=1, new_weight=1):
-    return graph.update_edge(start, old_end, new_end, old_weight, new_weight)
+async def update_edge(start: str, end: str, weight=1):
+    try:
+        graph.update_edge(start, end, weight)
+        return JSONResponse(content={"message": "Node updated successfully"}, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.delete("/delete_node")
 async def delete_node(info: str):
-    return graph.delete_node(info)
+    try:
+        graph.delete_node(info)
+        return JSONResponse(content={"message": "Node deleted successfully"})
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.delete("/delete_edge")
-async def delete_edge(start: str, end: str, weight=1):
-    return graph.delete_edge(start, end, weight)
+async def delete_edge(start: str, end: str):
+    try:
+        graph.delete_edge(start, end)
+        return JSONResponse(content={"message": "Edge deleted successfully"})
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/bfs")

@@ -12,20 +12,17 @@ class Node:
     def __eq__(self, other) -> bool:
         return self.info == other.info
 
-    def get_edge(self, info, weight: int) -> Edge:
-        edge = None
+    def get_edge(self, info) -> Edge:
         it = iter(self.edges)
         while it:
             try:
                 aux = next(it)
                 node = aux.node
-                #TODO
-                if node.info == info and aux.weight == weight:
-                    edge = aux
-                    break
+                if node.info == info:
+                    return aux
             except StopIteration:
                 break
-        return edge
+        return info
 
     def get_adjacent(self) -> list:
         adjacent = []
@@ -39,8 +36,21 @@ class Node:
                 break
         return adjacent
 
-    def insert_edge(self, edge: Edge):
-        self.edges.append(edge)
+    def update_edge(self, end, weight: int) -> None:
+        edge = self.get_edge(end)
+        if edge is not None:
+            edge.weight = weight
+        else:
+            raise Exception(f"Edge {self.info} -> {end} not exists")
+
+    def insert_edge(self, edge: Edge) -> None:
+        if edge in self.edges:
+            raise Exception(f"Edge {self.info} -> {edge.node.info} already exists")
+        else:
+            self.edges.append(edge)
 
     def delete_edge(self, edge: Edge):
-        self.edges.remove(edge)
+        try:
+            self.edges.remove(edge)
+        except ValueError:
+            raise Exception(f"Edge {self.info} -> {edge.node if type(edge) is not str else edge} unfounded")
