@@ -1,6 +1,6 @@
 import { Button, Form, FormInstance, Input, Modal, notification } from 'antd'
 import React, { useRef, useState } from 'react'
-import { insertNode } from '../services/apiServices';
+import { clearGraph, insertNode } from '../services/apiServices';
 
 interface OptionsProps {
   reloadGraph: ()=>void
@@ -23,9 +23,15 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
     })
     .catch(()=>{});
   }
+
+  const hanldeClearGraph = () => {
+    clearGraph()
+    .then(()=>reloadGraph())
+    .catch(()=>{})
+  }
   return (
     <div className='border-r-2 flex flex-col gap-4 px-8 my-8 pt-4'>
-        <Button>New graph</Button>
+        <Button onClick={hanldeClearGraph}>New graph</Button>
         <Button onClick={()=>setCurrentModal('insert_node')}>Insert node</Button>
         <Button>Import graph</Button>
         <Button>Export Graph</Button>

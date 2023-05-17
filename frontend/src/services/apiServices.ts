@@ -23,6 +23,9 @@ export const updateNode = async (old_info: string, new_info: string) => {
 export const deleteNode = async (info: string) => {
   return axiosRequest('delete', '/delete_node', {...{info}});
 };
+export const clearGraph = async () => {
+  return axiosRequest('delete', '/clear_graph');
+};
 
 //Edges
 export const insertEdge = async (start: string, end: string) => {
