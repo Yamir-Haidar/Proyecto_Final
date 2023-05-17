@@ -1,4 +1,4 @@
-import { Button, Form, FormInstance, Input, Modal, notification } from 'antd'
+import { Button, Form, FormInstance, Input, Modal } from 'antd'
 import React, { useRef, useState } from 'react'
 import { clearGraph, insertNode } from '../services/apiServices';
 
@@ -16,12 +16,24 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
       insertNode(info)
       .then(()=>{
         reloadGraph();
-        notification.success({message: 'Successfully node inserted'});
       })
       .catch(()=>{});
       setCurrentModal(undefined);
     })
     .catch(()=>{});
+  }
+
+  const handleEnter: React.KeyboardEventHandler<HTMLFormElement> = (e) => {
+    if (e.key==='Enter') {
+      switch (currentModal) {
+        case 'insert_node':
+            handleInsert()
+          break;
+      
+        default:
+          break;
+      }
+    }
   }
 
   const hanldeClearGraph = () => {
@@ -45,6 +57,7 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
           >
             <Form
               ref={insertForm}
+              onKeyDown={handleEnter}
             >
               <Form.Item
                 name='node_info'

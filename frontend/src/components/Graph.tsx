@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react'
 import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
-import { Form, FormInstance, Input, Modal, notification } from 'antd'
+import { Form, FormInstance, Input, Modal } from 'antd'
 import { IdType } from 'vis';
 import {  deleteNode, insertEdge, updateNode } from '../services/apiServices';
 
@@ -33,6 +33,19 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
     setCurrentModal('');
   }
 
+  const handleEnter: React.KeyboardEventHandler<HTMLFormElement> = (e) => {
+    if (e.key==='Enter') {
+      switch (currentModal) {
+        case 'update_node':
+          handleUpdateNode()
+          break;
+      
+        default:
+          break;
+      }
+    }
+  }
+
   //nodes
   const handleUpdateNode = () => {
     formUpdateNode.current?.validateFields()
@@ -49,7 +62,6 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
     deleteNode(String(node))
     .then(()=>{
       graphRef.current?.Network.deleteSelected();
-      notification.success({message: 'Successfully node deleted'});
     })
     .catch(()=>{})
   }
@@ -63,7 +75,6 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
   }
   const removeEdge = (edge: IdType) => {
     graphRef.current?.Network.deleteSelected();
-    notification.success({message: 'Successfully edge deleted'});
   }
   
   useEffect(() => {
@@ -125,6 +136,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
             >
               <Form
                 ref={formUpdateNode}
+                onKeyDown={handleEnter}
               >
                 <Form.Item
                   name='node_info_update'
