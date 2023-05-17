@@ -9,13 +9,7 @@ import { getNodes } from '../services/apiServices'
 const Layout: React.FC = () => {
   const [graph, setGraph] = useState<graphData>({
     nodes: [],
-    edges: [
-      { from: 1, to: 2, shadow: true },
-      { from: 1, to: 3 },
-      { from: 2, to: 4 },
-      { from: 2, to: 5 },
-      { from: 5, to: 2 },
-    ]
+    edges: []
   })
   const reloadGraph = () => {
     getNodes()
