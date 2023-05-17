@@ -1,9 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react'
 import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
-import { notification } from 'antd'
+import { Form, FormInstance, Input, Modal, notification } from 'antd'
 import { IdType } from 'vis';
-import { insertEdge } from '../services/apiServices';
+import {  deleteNode, insertEdge, updateNode } from '../services/apiServices';
 
 interface MainGraphProps {
   graph: graphData;
@@ -11,6 +11,8 @@ interface MainGraphProps {
 }
 
 const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
+  const formUpdateNode = useRef<FormInstance<any>>(null);
+  const [currentModal, setCurrentModal] = useState<string>();
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
     {x: 0, y: 0, visible: false, options:[]}
   );
@@ -27,28 +29,46 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
       height: "100%"
     };
 
-  const removeNode = (node: IdType) => {
-    graphRef.current?.Network.deleteSelected();
-    notification.success({message: 'Successfully node deleted'});
+  const hideModal = () => {
+    setCurrentModal('');
   }
 
+  //nodes
+  const handleUpdateNode = () => {
+    formUpdateNode.current?.validateFields()
+    .then(()=>{
+      const info = formUpdateNode.current?.getFieldValue('node_info_update');
+      const oldInfo = graphRef.current?.Network.getSelectedNodes()[0];
+      updateNode(String(oldInfo), info)
+      .then((data)=>{hideModal(); reloadGraph()})
+      .catch(()=>{});
+    })
+    .catch(()=>{})
+  }
+  const removeNode = (node: IdType) => {
+    deleteNode(String(node))
+    .then(()=>{
+      graphRef.current?.Network.deleteSelected();
+      notification.success({message: 'Successfully node deleted'});
+    })
+    .catch(()=>{})
+  }
   
-  
-  useEffect(() => {
-    console.log(graph)
-  }, [graph])
-
+  //Edges
   const preLinkNode = (node: IdType) => {
     setLinking(node);
     if (graphRef.current) {
       graphRef.current.container.current.setAttribute('style', 'cursor: pointer');
     }
   }
-
   const removeEdge = (edge: IdType) => {
     graphRef.current?.Network.deleteSelected();
     notification.success({message: 'Successfully edge deleted'});
   }
+  
+  useEffect(() => {
+    //console.log(graph)
+  }, [graph])
 
   const events: graphEvents = {
     oncontext: function(event: any) {
@@ -59,6 +79,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
         if (node) {
           graphRef.current.Network.selectNodes([node]);
           setFloatOptions({visible:true, x: x, y: y, options: [
+            {label: 'Update', click: ()=>setCurrentModal('update_node')},
             {label: 'Link', click: ()=>preLinkNode(node)},
             {label: 'Delete', click: ()=>removeNode(node)},
           ]})
@@ -94,6 +115,30 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
           }}
         />
         <FloatOptions {...floatOptions} onCancel={()=>setFloatOptions({visible: false, x: 0, y: 0, options: []})}/>
+        {currentModal === 'update_node' &&
+          <Modal
+          title='Update node'
+              centered
+              open={true}
+              onCancel={()=>hideModal()}
+              onOk={handleUpdateNode}
+            >
+              <Form
+                ref={formUpdateNode}
+              >
+                <Form.Item
+                  name='node_info_update'
+                  label='Info'
+                  rules={[
+                    {required: true, message: 'Select the info!'}
+                  ]}
+                >
+                  <Input/>
+                </Form.Item>
+              </Form>
+          </Modal>
+        }
+        
     </div>
   )
 }

@@ -1,11 +1,14 @@
 import React from 'react';
 import './App.css';
 import Layout from './components/Layout';
+import AxiosInterceptor from './components/AxiosInterceptor';
 
 const App: React.FC = () => {
   return (
     <div className="App">
-      <Layout/>
+      <AxiosInterceptor>
+        <Layout/>
+      </AxiosInterceptor>
     </div>
   );
 }

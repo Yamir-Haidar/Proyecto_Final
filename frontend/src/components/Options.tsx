@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 import { Button, Form, FormInstance, Input, Modal, notification } from 'antd'
 import React, { useRef, useState } from 'react'
 import { insertNode } from '../services/apiServices';
@@ -6,12 +5,6 @@ import { insertNode } from '../services/apiServices';
 interface OptionsProps {
   reloadGraph: ()=>void
 }
-
-const ModalStyled = styled(Modal)`
-  .ant-btn-primary {
-    background-color: #1677ff ;
-  }
-`
 
 const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
   const [currentModal, setCurrentModal] = useState<string>();
@@ -25,7 +18,7 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
         reloadGraph();
         notification.success({message: 'Successfully node inserted'});
       })
-      .catch((error)=>notification.error({message: error.response.data.detail}));
+      .catch(()=>{});
       setCurrentModal(undefined);
     })
     .catch(()=>{});
@@ -37,7 +30,7 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
         <Button>Import graph</Button>
         <Button>Export Graph</Button>
         {currentModal==='insert_node' &&
-          <ModalStyled
+          <Modal
             title='Insert node'
             centered
             open={true}
@@ -57,7 +50,7 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
                 <Input/>
               </Form.Item>
             </Form>
-          </ModalStyled>
+          </Modal>
         }
         
     </div>
