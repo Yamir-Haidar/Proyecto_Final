@@ -13,6 +13,9 @@ class Graph:
     def __init__(self):
         self.nodes = deque()
 
+    def clear_graph(self):
+        self.nodes.clear()
+
     def get_nodes_and_edges(self):
         result = {"nodes": [], "edges": []}
         for node in self.nodes:

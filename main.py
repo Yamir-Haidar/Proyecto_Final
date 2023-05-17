@@ -20,6 +20,11 @@ async def get_nodes():
     return graph.get_nodes_and_edges()
 
 
+@app.delete("/clear_graph")
+async def clear_graph():
+    return graph.clear_graph()
+
+
 @app.post("/insert_node")
 async def insert_node(info: str):
     try:
