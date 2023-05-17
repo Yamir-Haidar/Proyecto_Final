@@ -34,7 +34,7 @@ class Graph:
         node = Node(info)
         self.nodes.append(node)
 
-    def insert_edge(self, info1: str, info2: str, weight=1) -> None:
+    def insert_edge(self, info1: str, info2: str, weight: int = 1) -> None:
         """
        Inserta una arista entre dos nodos
 
@@ -50,11 +50,13 @@ class Graph:
        """
         node1 = self.get_node(info1)
         if node1 is None:
-            raise Exception(f"Node {node1} not exists")
+            raise Exception(f"Node {info1} not exists")
         node2 = self.get_node(info2)
         if node2 is None:
-            raise Exception(f"Node {node2} not exists")
+            raise Exception(f"Node {info2} not exists")
         edge = Edge(node2, weight)
+        if edge in node1.edges:
+            raise Exception(f"Edge {info1} -> {info2} already exists")
         node1.insert_edge(edge)
 
     def update_node(self, old_info: str, new_info: str) -> None:
@@ -75,15 +77,18 @@ class Graph:
 
     def update_edge(self, start: str, end: str, weight=1):
         node1 = self.get_node(start)
-        if node1 not in self.nodes:
+        if node1 is None or node1 not in self.nodes:
             raise Exception(f"Node {start} not exists")
         node2 = self.get_node(end)
-        if node2 not in self.nodes:
+        if node2 is None or node2 not in self.nodes:
             raise Exception(f"Node {end} not exists")
         edge = Edge(node2, weight)
         if edge in node1.edges:
-            raise Exception(f"Edge {start} -> {end} already exists")
-        node1.edges.append(edge)
+            if node1.get_edge(end).weight == weight:
+                raise Exception(f"Edge {start} -> {end} with weight {weight} already exists")
+            else:
+                node1.get_edge(end).weight = weight
+        raise Exception(f"Non existent edge {start} -> {end}")
 
     def delete_node(self, info: str) -> None:
         """
@@ -100,8 +105,9 @@ class Graph:
         while it:
             try:
                 node = next(it)
-                if node_to_delete in node.edges:
-                    node.delete_edge(node.get_edge(info))
+                for edge in node.edges:
+                    if node_to_delete.info == edge.node.info:
+                        node.delete_edge(node.get_edge(info))
             except StopIteration:
                 break
         self.nodes.remove(node_to_delete)
@@ -117,7 +123,7 @@ class Graph:
 
     def existing_node(self, info: str) -> bool:
         """
-            Indica si existe una nodo dada su info
+            Indica si existe un nodo dada su info
 
             :param info: Info del nodo
             :return: (True) En caso de que exista el nodo

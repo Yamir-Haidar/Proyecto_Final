@@ -24,7 +24,7 @@ async def get_nodes():
 async def insert_node(info: str):
     try:
         graph.insert_node(info)
-        return JSONResponse(content={"message": "Edge inserted successfully"}, status_code=200)
+        return JSONResponse(content={"message": "Node inserted successfully"}, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -51,7 +51,7 @@ async def update_node(old_info: str, new_info: str):
 async def update_edge(start: str, end: str, weight=1):
     try:
         graph.update_edge(start, end, weight)
-        return JSONResponse(content={"message": "Node updated successfully"}, status_code=200)
+        return JSONResponse(content={"message": "Edge updated successfully"}, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -60,7 +60,7 @@ async def update_edge(start: str, end: str, weight=1):
 async def delete_node(info: str):
     try:
         graph.delete_node(info)
-        return JSONResponse(content={"message": "Node deleted successfully"})
+        return JSONResponse(content={"message": "Node deleted successfully"}, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -69,7 +69,7 @@ async def delete_node(info: str):
 async def delete_edge(start: str, end: str):
     try:
         graph.delete_edge(start, end)
-        return JSONResponse(content={"message": "Edge deleted successfully"})
+        return JSONResponse(content={"message": "Edge deleted successfully"}, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

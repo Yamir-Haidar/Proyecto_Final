@@ -10,7 +10,7 @@ class Node:
         return self.info
 
     def __eq__(self, other) -> bool:
-        return self.info == other.info
+        return self.info == other.info if type(other) is not str else False
 
     def get_edge(self, info) -> Edge:
         it = iter(self.edges)
