@@ -3,7 +3,7 @@ import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
 import { Form, FormInstance, Input, Modal } from 'antd'
 import { IdType } from 'vis';
-import {  deleteEdge, deleteNode, insertEdge, updateEdge, updateNode } from '../services/apiServices';
+import {  breadthFirstSearch, deleteEdge, deleteNode, depthFirstSearch, insertEdge, insertNode, updateEdge, updateNode } from '../services/apiServices';
 
 interface MainGraphProps {
   graph: graphData;
@@ -13,6 +13,7 @@ interface MainGraphProps {
 const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
   const formUpdateNode = useRef<FormInstance<any>>(null);
   const formUpdateEdge = useRef<FormInstance<any>>(null);
+  const insertForm = useRef<FormInstance<any>>(null);
   const [currentModal, setCurrentModal] = useState<string>();
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
     {x: 0, y: 0, visible: false, options:[]}
@@ -50,6 +51,19 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
   }
 
   //nodes
+  const handleInsert = () => {
+    insertForm.current?.validateFields()
+    .then(()=>{
+      const info = insertForm.current?.getFieldValue('node_info');
+      insertNode(info)
+      .then(()=>{
+        reloadGraph();
+      })
+      .catch(()=>{});
+      hideModal();
+    })
+    .catch(()=>{});
+  }
   const handleUpdateNode = () => {
     formUpdateNode.current?.validateFields()
     .then(()=>{
@@ -102,6 +116,18 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
     }
     
   }
+
+  //searchs
+  const depthFirst = (node: IdType) => {
+    breadthFirstSearch(String(node))
+    .then((data)=>console.log(data.data))
+    .catch(()=>{});
+  }
+  const breadthFirst = (node: IdType) => {
+    depthFirstSearch(String(node))
+    .then((data)=>console.log(data.data))
+    .catch(()=>{});
+  }
   
   useEffect(() => {
     //console.log(graph)
@@ -118,6 +144,8 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
           setFloatOptions({visible:true, x: x, y: y, options: [
             {label: 'Update', click: ()=>setCurrentModal('update_node')},
             {label: 'Link', click: ()=>preLinkNode(node)},
+            {label: 'Depth First', click: ()=>depthFirst(node)},
+            {label: 'Breadth First', click: ()=>breadthFirst(node)},
             {label: 'Delete', click: ()=>removeNode(node)},
           ]})
         } else {
@@ -127,6 +155,10 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
             setFloatOptions({visible:true, x: x, y: y, options: [
               {label: 'Update', click: ()=>setCurrentModal('update_edge')},
               {label: 'Delete', click: ()=>removeEdge(edge)},
+            ]})
+          } else {
+            setFloatOptions({visible:true, x: x, y: y, options: [
+              {label: 'Create Node', click: ()=>setCurrentModal('insert_node')},
             ]})
           }
         }
@@ -201,6 +233,30 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
                   <Input/>
                 </Form.Item>
               </Form>
+          </Modal>
+        }
+        {currentModal==='insert_node' &&
+          <Modal
+            title='Insert node'
+            centered
+            open={true}
+            onCancel={()=>setCurrentModal(undefined)}
+            onOk={handleInsert}
+          >
+            <Form
+              ref={insertForm}
+              onKeyDown={handleEnter}
+            >
+              <Form.Item
+                name='node_info'
+                label='Info'
+                rules={[
+                  {required: true, message: 'Select the info!'}
+                ]}
+              >
+                <Input/>
+              </Form.Item>
+            </Form>
           </Modal>
         }
         
