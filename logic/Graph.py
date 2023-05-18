@@ -163,16 +163,16 @@ class Graph:
         queue = deque()
         for node in self.nodes:
             if node.info == start:
-                queue.append(node)
+                queue.append(node.info)
         if len(queue) == 0:
             raise Exception(f"Node {start} non exists")
 
         while queue:
-            current_node = queue.popleft()
-            visited.append(current_node)
+            current_node = self.get_node(queue.popleft())
+            visited.append(current_node.info)
             for edge in current_node.edges:
-                if edge.node not in visited and edge.node not in queue:
-                    queue.append(edge.node)
+                if edge.node.info not in visited and edge.node.info not in queue:
+                    queue.append(edge.node.info)
         return visited
 
     def depth_first_search(self, start: str) -> list:
