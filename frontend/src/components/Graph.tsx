@@ -3,7 +3,7 @@ import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
 import { Form, FormInstance, Input, Modal } from 'antd'
 import { IdType } from 'vis';
-import {  deleteEdge, deleteNode, insertEdge, updateNode } from '../services/apiServices';
+import {  deleteEdge, deleteNode, insertEdge, updateEdge, updateNode } from '../services/apiServices';
 
 interface MainGraphProps {
   graph: graphData;
@@ -12,6 +12,7 @@ interface MainGraphProps {
 
 const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
   const formUpdateNode = useRef<FormInstance<any>>(null);
+  const formUpdateEdge = useRef<FormInstance<any>>(null);
   const [currentModal, setCurrentModal] = useState<string>();
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
     {x: 0, y: 0, visible: false, options:[]}
@@ -37,9 +38,11 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
     if (e.key==='Enter') {
       switch (currentModal) {
         case 'update_node':
-          handleUpdateNode()
+          handleUpdateNode();
           break;
-      
+        case 'update_edge':
+          handleUpdateEdge();
+          break;
         default:
           break;
       }
@@ -72,6 +75,21 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
     if (graphRef.current) {
       graphRef.current.container.current.setAttribute('style', 'cursor: pointer');
     }
+  }
+  const handleUpdateEdge = () => {
+    formUpdateEdge.current?.validateFields()
+    .then(()=>{
+      const edge = graphRef.current?.Network.getSelectedEdges()[0];
+      if (edge) {
+        const weight = formUpdateEdge.current?.getFieldValue('edge_weight_update');
+        const nodes = graphRef.current?.Network.getConnectedNodes(edge);
+        updateEdge(String(nodes[0]), String(nodes[1]), weight)
+        .then(()=>{hideModal(); reloadGraph()})
+        .catch(()=>{});
+      }
+      
+    })
+    .catch(()=>{})
   }
   const removeEdge = (edge: IdType) => {
     const nodes = graphRef.current?.Network.getConnectedNodes(edge);
@@ -106,7 +124,10 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
           const edge = graphRef.current.Network.getEdgeAt({x: x, y: y});
           if (edge) {
             graphRef.current.Network.selectEdges([edge]);
-            setFloatOptions({visible:true, x: x, y: y, options: [{label: 'Delete', click: ()=>removeEdge(edge)}]})
+            setFloatOptions({visible:true, x: x, y: y, options: [
+              {label: 'Update', click: ()=>setCurrentModal('update_edge')},
+              {label: 'Delete', click: ()=>removeEdge(edge)},
+            ]})
           }
         }
       }
@@ -151,6 +172,30 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
                   label='Info'
                   rules={[
                     {required: true, message: 'Select the info!'}
+                  ]}
+                >
+                  <Input/>
+                </Form.Item>
+              </Form>
+          </Modal>
+        }
+        {currentModal === 'update_edge' &&
+          <Modal
+          title='Update edge'
+              centered
+              open={true}
+              onCancel={()=>hideModal()}
+              onOk={handleUpdateEdge}
+            >
+              <Form
+                ref={formUpdateEdge}
+                onKeyDown={handleEnter}
+              >
+                <Form.Item
+                  name='edge_weight_update'
+                  label='Weight'
+                  rules={[
+                    {required: true, message: 'Input the weight!'}
                   ]}
                 >
                   <Input/>
