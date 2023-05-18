@@ -181,7 +181,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
         }
         {currentModal === 'update_edge' &&
           <Modal
-          title='Update edge'
+              title='Update edge'
               centered
               open={true}
               onCancel={()=>hideModal()}
