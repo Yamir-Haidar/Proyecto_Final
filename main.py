@@ -108,7 +108,7 @@ async def depth_first_search(start: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.post("/save")
+@app.get("/save")
 async def save(filename: str):
     return graph.save(filename)
 
@@ -116,7 +116,9 @@ async def save(filename: str):
 @app.post("/load")
 async def load(file: UploadFile):
     try:
-        graph = Graph.load(file)
+        content = await file.read()
+        file_str = content.decode("utf-8").replace("\r\n", '\n')
+        graph = Graph.load(file_str)
         return graph.get_nodes_and_edges()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
