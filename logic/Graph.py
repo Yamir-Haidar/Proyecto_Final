@@ -2,10 +2,9 @@ import base64
 import binascii
 import os
 from collections import deque
-
 from logic.Edge import Edge
 from logic.Node import Node
-from logic.UnreliableGraph import UnreliableGraph
+from logic.exceptions import UnreliableGraph, Exc
 
 
 class Graph:
@@ -33,7 +32,7 @@ class Graph:
                 :return: (False) En caso de no poder insertar el nodo dado que ya existia
                 """
         if self.existing_node(info):
-            raise Exception(f"Node {info} already exists")
+            raise Exc("existing_node", [info])
         node = Node(info)
         self.nodes.append(node)
 
@@ -165,11 +164,12 @@ class Graph:
         for node in self.nodes:
             if node.info == start:
                 queue.append(node)
+        if len(queue) == 0:
+            raise Exception(f"Node {start} non exists")
 
         while queue:
             current_node = queue.popleft()
             visited.append(current_node)
-
             for edge in current_node.edges:
                 if edge.node not in visited and edge.node not in queue:
                     queue.append(edge.node)
@@ -183,6 +183,8 @@ class Graph:
         """
         visited = []
         start = self.get_node(start)
+        if start is None:
+            raise Exception(f"Node {start} non exists")
         self._depth_first_search(start, visited)
         return visited
 

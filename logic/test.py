@@ -11,7 +11,7 @@ def print_dic(dic: dict):
 
 
 grafo.insert_node("A")
-grafo.insert_node("B")
+grafo.insert_node("A")
 
 # grafo.insert_edge("A", "A")
 grafo.insert_edge("A", "B")

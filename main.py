@@ -1,7 +1,8 @@
-from logic.Graph import Graph
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+from logic.Graph import Graph
 
 graph = Graph()
 app = FastAPI()
@@ -81,13 +82,21 @@ async def delete_edge(start: str, end: str):
 
 
 @app.get("/bfs")
-async def breadth_first_search(start: str) -> list:
-    return graph.breadth_first_search(start)
+async def breadth_first_search(start: str):
+    try:
+        result = graph.breadth_first_search(start)
+        return JSONResponse(status_code=200, content=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/dfs")
 async def depth_first_search(start: str):
-    return graph.depth_first_search(start)
+    try:
+        result = graph.depth_first_search(start)
+        return JSONResponse(status_code=200, content=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/save")
