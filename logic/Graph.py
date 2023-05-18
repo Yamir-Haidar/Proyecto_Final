@@ -195,9 +195,9 @@ class Graph:
         :param visited: lista con los nodos visitados
         :return:
         """
-        visited.append(node)
+        visited.append(node.info)
         for edge in node.edges:
-            if edge.node not in visited:
+            if edge.node.info not in visited:
                 self._depth_first_search(edge.node, visited)
 
     def save(self, filename: str) -> None:
