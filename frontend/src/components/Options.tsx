@@ -1,7 +1,8 @@
-import { Button, Form, FormInstance, Input, Modal, Select } from 'antd'
+import { Button, Form, FormInstance, Input, Modal, Select, Upload } from 'antd'
 import React, { useRef, useState } from 'react'
 import { breadthFirstSearch, clearGraph, depthFirstSearch, insertNode } from '../services/apiServices';
 import { DefaultOptionType } from 'antd/es/select';
+import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 
 interface OptionsProps {
   reloadGraph: ()=>void
@@ -22,6 +23,14 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
       value: 'depthFirst',
     },
   ]
+
+  const normFile = (e: any) => {
+    console.log('Upload event:', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+  };
 
   const handleInsert = () => {
     insertForm.current?.validateFields()
@@ -61,6 +70,10 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
     .catch(()=>{});
   }
 
+  const handleUpload = () => {
+
+  }
+
   const handleEnter: React.KeyboardEventHandler<HTMLFormElement> = (e) => {
     if (e.key==='Enter') {
       switch (currentModal) {
@@ -86,8 +99,8 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
         <Button onClick={hanldeClearGraph}>New graph</Button>
         <Button onClick={()=>setCurrentModal('insert_node')}>Insert node</Button>
         <Button onClick={()=>setCurrentModal('travels')}>Travels</Button>
-        <Button>Import graph</Button>
-        <Button>Export Graph</Button>
+        <Button onClick={()=>setCurrentModal('load')}>Import graph</Button>
+        <Button onClick={()=>setCurrentModal('')}>Export Graph</Button>
         {currentModal==='insert_node' &&
           <Modal
             title='Insert node'
@@ -145,6 +158,33 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
             </Form>
           </Modal>
         }
+        {currentModal==='load' &&
+          <Modal
+            title='Load graph'
+            centered
+            open={true}
+            onCancel={()=>setCurrentModal(undefined)}
+            onOk={handleUpload}
+          >
+            <Form
+              ref={travelsForm}
+              onKeyDown={handleEnter}
+            >
+              <Form.Item name="dragger" valuePropName="fileList" getValueFromEvent={normFile} noStyle>
+                <Upload.Dragger name="files" action="/upload.do">
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                  <p className="ant-upload-hint">Support for a single or bulk upload.</p>
+                </Upload.Dragger>
+              </Form.Item>
+            </Form>
+          </Modal>
+        }
+
+
+
         
     </div>
   )
