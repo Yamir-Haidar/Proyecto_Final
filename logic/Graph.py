@@ -91,7 +91,8 @@ class Graph:
                 raise Exception(f"Edge {start} -> {end} with weight {weight} already exists")
             else:
                 node1.get_edge(end).weight = weight
-        raise Exception(f"Non existent edge {start} -> {end}")
+        else:
+            raise Exception(f"Non existent edge {start} -> {end}")
 
     def delete_node(self, info: str) -> None:
         """
