@@ -5,6 +5,15 @@ from fastapi.responses import JSONResponse
 from logic.Graph import Graph
 
 graph = Graph()
+graph.insert_node("A")
+graph.insert_node("B")
+graph.insert_node("C")
+graph.insert_node("D")
+graph.insert_edge("A", "B")
+graph.insert_edge("C", "B")
+graph.insert_edge("D", "B")
+
+
 app = FastAPI()
 
 app.add_middleware(
