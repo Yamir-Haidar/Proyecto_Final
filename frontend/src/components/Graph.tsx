@@ -3,7 +3,7 @@ import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
 import { Form, FormInstance, Input, Modal } from 'antd'
 import { IdType } from 'vis';
-import {  deleteNode, insertEdge, updateNode } from '../services/apiServices';
+import {  deleteEdge, deleteNode, insertEdge, updateNode } from '../services/apiServices';
 
 interface MainGraphProps {
   graph: graphData;
@@ -74,7 +74,15 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
     }
   }
   const removeEdge = (edge: IdType) => {
-    graphRef.current?.Network.deleteSelected();
+    const nodes = graphRef.current?.Network.getConnectedNodes(edge);
+    if (nodes && nodes.length===2) {
+      deleteEdge(String(nodes[0]), String(nodes[1]))
+      .then(()=>{
+        graphRef.current?.Network.deleteSelected();
+      })
+      .catch(()=>{});
+    }
+    
   }
   
   useEffect(() => {
