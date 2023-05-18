@@ -92,7 +92,11 @@ async def breadth_first_search(start: str):
 
 @app.get("/dfs")
 async def depth_first_search(start: str):
-    return graph.depth_first_search(start)
+    try:
+        result = graph.depth_first_search(start)
+        return JSONResponse(status_code=200, content=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/save")

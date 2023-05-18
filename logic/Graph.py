@@ -183,6 +183,8 @@ class Graph:
         """
         visited = []
         start = self.get_node(start)
+        if start is None:
+            raise Exception(f"Node {start} non exists")
         self._depth_first_search(start, visited)
         return visited
 
