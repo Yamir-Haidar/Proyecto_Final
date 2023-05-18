@@ -2,7 +2,7 @@ from logic import Edge
 
 
 class Node:
-    def __init__(self, info):
+    def __init__(self, info: str):
         self.info = info
         self.edges = []
 
