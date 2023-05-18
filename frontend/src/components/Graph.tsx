@@ -2,19 +2,23 @@ import React, { useRef, useState, useEffect } from 'react'
 import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
 import { Form, FormInstance, Input, Modal } from 'antd'
-import { IdType } from 'vis';
+import { IdType, Position } from 'vis';
 import {  breadthFirstSearch, deleteEdge, deleteNode, depthFirstSearch, insertEdge, insertNode, updateEdge, updateNode } from '../services/apiServices';
+import { color } from '../settings';
+import { darken, lighten } from '../utils/colors';
 
 interface MainGraphProps {
   graph: graphData;
   reloadGraph: ()=>void;
+  setGraph: React.Dispatch<React.SetStateAction<graphData>>;
 }
 
-const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
+const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => {
   const formUpdateNode = useRef<FormInstance<any>>(null);
   const formUpdateEdge = useRef<FormInstance<any>>(null);
   const insertForm = useRef<FormInstance<any>>(null);
   const [currentModal, setCurrentModal] = useState<string>();
+  const [nodesTravel, setNodesTravel] = useState<string[]>([]);
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
     {x: 0, y: 0, visible: false, options:[]}
   );
@@ -125,13 +129,84 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
   }
   const breadthFirst = (node: IdType) => {
     depthFirstSearch(String(node))
-    .then((data)=>console.log(data.data))
+    .then((data)=>{
+      setNodesTravel(data.data);
+    })
     .catch(()=>{});
   }
-  
+
   useEffect(() => {
-    //console.log(graph)
-  }, [graph])
+    resetNodesColors();
+    animSearch(0);
+  }, [nodesTravel])
+
+  const resetNodesColors = () => {
+    setGraph(({edges, nodes})=>{
+      return {edges, nodes: nodes.map((node)=>{
+        return {...node, color: {
+          background: color.node, 
+          border: darken(color.node, 20), 
+          highlight: {
+            background: lighten(color.node, 20),
+            border: color.node
+          }
+        }}
+      })}
+    })
+  }
+  
+
+  const animSearch = (current: number) => {
+    if (current<nodesTravel.length) {
+      setGraph((gr)=>{
+        const currentNode = nodesTravel[current]  as keyof Position;
+        const newNodes = gr.nodes.map((node)=>{
+          return node.id===currentNode? {
+            ...node, 
+            color: {
+              background: color.travelNode,
+              border: darken(color.travelNode,20), 
+              highlight: {
+                backgorund: lighten(color.travelNode,20), 
+                border: color.travelNode
+              }
+            }
+          }
+          : node
+        });
+        const {x, y} = graphRef.current?.Network.getPositions(currentNode)[currentNode] as any;
+        if (x && y) {
+          tickNode(currentNode, x, y);
+        }
+        return {nodes: newNodes, edges: gr.edges}
+      })
+      setTimeout(()=>animSearch(current+1), 1000)
+    } else {
+      if (nodesTravel.length>0) {
+        Modal.info({
+          title: 'travel',
+          centered: true,
+          onOk: ()=>setNodesTravel([]),
+          content: (
+            <div className='flex flex-row gap-1'>
+              {nodesTravel.map((node)=><div>{node} -&gt;</div>)}
+            </div>
+          )
+        });
+      }
+    }
+  }
+
+  const tickNode = (node: string, x: number, y: number) => {
+    tickNodeAux(node, x, y, 3);
+  }
+  const tickNodeAux = (node: string, x: number, y: number, count: number) => {
+    const move = 5 * (count%2? 1: -1);
+    graphRef.current?.Network.moveNode(node, x+move, y+move);
+    if (count>0) {
+      setTimeout(()=>tickNodeAux(node, x, y, count-1), 100);
+    }
+  } 
 
   const events: graphEvents = {
     oncontext: function(event: any) {
@@ -259,7 +334,6 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, reloadGraph}) => {
             </Form>
           </Modal>
         }
-        
     </div>
   )
 }

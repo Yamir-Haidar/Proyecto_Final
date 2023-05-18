@@ -1,9 +1,8 @@
 import { Button, Form, FormInstance, Input, Modal, Select, Upload, UploadFile, UploadProps, notification } from 'antd'
 import React, { useRef, useState } from 'react'
-import { API, breadthFirstSearch, clearGraph, depthFirstSearch, insertNode, load } from '../services/apiServices';
+import { breadthFirstSearch, clearGraph, depthFirstSearch, insertNode, load } from '../services/apiServices';
 import { DefaultOptionType } from 'antd/es/select';
-import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
-import Dragger from 'antd/es/upload/Dragger';
+import { InboxOutlined, LoadingOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/es/upload';
 
 interface OptionsProps {
@@ -11,7 +10,7 @@ interface OptionsProps {
 }
 
 const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [currentModal, setCurrentModal] = useState<string>();
   const insertForm = useRef<FormInstance<any>>(null);
   const uploadForm = useRef<FormInstance<any>>(null);
@@ -41,24 +40,28 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
     multiple: false,
     maxCount: 1,
     // action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-    // onChange(info) {
-    //   const { status } = info.file;
-    //   if (status !== 'uploading') {
-    //     console.log(info.file, info.fileList);
-    //   }
-    //   if (status === 'done') {
-    //     console.log(`${info.file.name} file uploaded successfully.`);
-    //   } else if (status === 'error') {
-    //     console.log(`${info.file.name} file upload failed.`);
-    //   }
-    // },
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (status === 'done') {
+        console.log(`${info.file.name} file uploaded successfully.`);
+      } else if (status === 'error') {
+        console.log(`${info.file.name} file upload failed.`);
+      }
+    },
+
+    
     
     beforeUpload(file) {
       const formData = new FormData();
       
       formData.append('file', file as RcFile);
-      // setUploading(true);
+      setUploading(true);
       load(formData)
+      .then(()=>{setUploading(false)})
+      .catch(()=>{setUploading(false)})
       return false;
     },
     onDrop(e) {
@@ -215,13 +218,18 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
                   {required: true, message: 'Pleade upload!'}
                 ]}
               >
-                <Dragger {...props}>
+                <Upload.Dragger {...props}>
                   <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
+                    {!uploading &&
+                      <InboxOutlined />
+                    }
+                    {uploading &&
+                      <LoadingOutlined />
+                    }
                   </p>
                   <p className="ant-upload-text">Click or drag file to this area to upload</p>
                   <p className="ant-upload-hint">Support for a single or bulk upload.</p>
-                </Dragger>
+                </Upload.Dragger>
               </Form.Item>
             </Form>
           </Modal>

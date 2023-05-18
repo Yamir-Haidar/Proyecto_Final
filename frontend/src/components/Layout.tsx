@@ -26,7 +26,7 @@ const Layout: React.FC = () => {
         <Header/>
         <div className='flex flex-row flex-1'>
             <Options {...{reloadGraph}}/>
-            <MainGraph {...{graph, reloadGraph}}/>
+            <MainGraph {...{graph, setGraph, reloadGraph}}/>
         </div>
         
     </div>

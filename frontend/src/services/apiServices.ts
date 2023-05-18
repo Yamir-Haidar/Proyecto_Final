@@ -1,4 +1,3 @@
-import { RcFile } from "antd/es/upload";
 import axios, { Method } from "axios";
 
 export const API = 'http://localhost:8000';
