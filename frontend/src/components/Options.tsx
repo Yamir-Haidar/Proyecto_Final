@@ -1,16 +1,20 @@
-import { Button, Form, FormInstance, Input, Modal, Select, Upload } from 'antd'
+import { Button, Form, FormInstance, Input, Modal, Select, Upload, UploadFile, UploadProps, notification } from 'antd'
 import React, { useRef, useState } from 'react'
-import { breadthFirstSearch, clearGraph, depthFirstSearch, insertNode } from '../services/apiServices';
+import { API, breadthFirstSearch, clearGraph, depthFirstSearch, insertNode, load } from '../services/apiServices';
 import { DefaultOptionType } from 'antd/es/select';
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
+import Dragger from 'antd/es/upload/Dragger';
+import { RcFile } from 'antd/es/upload';
 
 interface OptionsProps {
   reloadGraph: ()=>void
 }
 
 const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [currentModal, setCurrentModal] = useState<string>();
   const insertForm = useRef<FormInstance<any>>(null);
+  const uploadForm = useRef<FormInstance<any>>(null);
   const travelsForm = useRef<FormInstance<any>>(null);
 
   const options: DefaultOptionType[] = [
@@ -31,6 +35,36 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
     }
     return e?.fileList;
   };
+
+  const props: UploadProps = {
+    name: 'file',
+    multiple: false,
+    maxCount: 1,
+    // action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+    // onChange(info) {
+    //   const { status } = info.file;
+    //   if (status !== 'uploading') {
+    //     console.log(info.file, info.fileList);
+    //   }
+    //   if (status === 'done') {
+    //     console.log(`${info.file.name} file uploaded successfully.`);
+    //   } else if (status === 'error') {
+    //     console.log(`${info.file.name} file upload failed.`);
+    //   }
+    // },
+    
+    beforeUpload(file) {
+      const formData = new FormData();
+      
+      formData.append('file', file as RcFile);
+      // setUploading(true);
+      load(formData)
+      return false;
+    },
+    onDrop(e) {
+      console.log('Dropped files', e.dataTransfer.files);
+    },
+  }
 
   const handleInsert = () => {
     insertForm.current?.validateFields()
@@ -71,7 +105,9 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
   }
 
   const handleUpload = () => {
-
+    uploadForm.current?.validateFields()
+    .then()
+    .catch();
   }
 
   const handleEnter: React.KeyboardEventHandler<HTMLFormElement> = (e) => {
@@ -167,17 +203,25 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
             onOk={handleUpload}
           >
             <Form
-              ref={travelsForm}
+              ref={uploadForm}
               onKeyDown={handleEnter}
             >
-              <Form.Item name="dragger" valuePropName="fileList" getValueFromEvent={normFile} noStyle>
-                <Upload.Dragger name="files" action="/upload.do">
+              <Form.Item
+                name="dragger"
+                valuePropName='fileList'
+                getValueFromEvent={normFile}
+                noStyle
+                rules={[
+                  {required: true, message: 'Pleade upload!'}
+                ]}
+              >
+                <Dragger {...props}>
                   <p className="ant-upload-drag-icon">
                     <InboxOutlined />
                   </p>
                   <p className="ant-upload-text">Click or drag file to this area to upload</p>
                   <p className="ant-upload-hint">Support for a single or bulk upload.</p>
-                </Upload.Dragger>
+                </Dragger>
               </Form.Item>
             </Form>
           </Modal>
@@ -185,7 +229,7 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
 
 
 
-        
+
     </div>
   )
 }

@@ -1,12 +1,19 @@
+import { RcFile } from "antd/es/upload";
 import axios, { Method } from "axios";
 
-const API = 'http://localhost:8000';
+export const API = 'http://localhost:8000';
 
-const axiosRequest = async (method: Method, url: string, params: any = null) => {
+const axiosRequest = async (method: Method, url: string, params: any = null, type: 'file' | null = null) => {
   url = `${API}${url}`
-    return axios({
+    if (type) {
+      return axios({
+        ...{method, url, data: {file: params}, headers: {"Content-Type": "multipart/form-data"}}
+      })
+    } else {
+      return axios({
         ...{method, url, params}
-    })
+      })
+    }
 };
 
 
@@ -50,6 +57,6 @@ export const depthFirstSearch = async (start: string) => {
 export const save = async (filename: string) => {
   return axiosRequest('post', '/save', {...{filename}});
 };
-export const load = async (filename: string) => {
-  return axiosRequest('get', '/load', {...{filename}});
+export const load = async (file: FormData) => {
+  return axiosRequest('post', '/load', file, 'file');
 };
