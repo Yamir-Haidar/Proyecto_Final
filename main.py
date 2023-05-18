@@ -119,9 +119,14 @@ async def load(file: UploadFile):
         content = await file.read()
         file_str = content.decode("utf-8").replace("\r\n", '\n')
         graph = Graph.load(file_str)
-        return JSONResponse(status_code=200, content=graph.get_nodes_and_edges())
+        return JSONResponse(status_code=200, content=graph)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/load_ok")
+async def load_ok():
+    return JSONResponse(status_code=200, content=graph.get_nodes_and_edges())
 
 
 @app.post("/export")
