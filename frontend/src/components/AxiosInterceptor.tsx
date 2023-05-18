@@ -7,9 +7,11 @@ const AxiosInterceptor: React.FC<{children: React.ReactNode}> = ({children}) => 
         const interceptor = axios.interceptors.response.use(
             response => {
             console.log('Respuesta exitosa:', response);
-            const {message} = response.data
-            if (message) {
-                notification.success({...{message}});
+            if (response.data) {
+                const {message} = response.data
+                if (message) {
+                    notification.success({...{message}});
+                }
             }
             return response;
             },

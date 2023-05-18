@@ -124,7 +124,9 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
   //searchs
   const depthFirst = (node: IdType) => {
     breadthFirstSearch(String(node))
-    .then((data)=>console.log(data.data))
+    .then((data)=>{
+      setNodesTravel(data.data);
+    })
     .catch(()=>{});
   }
   const breadthFirst = (node: IdType) => {
@@ -137,6 +139,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
 
   useEffect(() => {
     resetNodesColors();
+    graphRef.current?.Network.unselectAll();
     animSearch(0);
   }, [nodesTravel])
 
@@ -189,7 +192,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
           onOk: ()=>setNodesTravel([]),
           content: (
             <div className='flex flex-row gap-1'>
-              {nodesTravel.map((node)=><div>{node} -&gt;</div>)}
+              {nodesTravel.map((node, index)=><div>{node} {(index<nodesTravel.length-1)?"->":""}</div>)}
             </div>
           )
         });
@@ -333,6 +336,9 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
               </Form.Item>
             </Form>
           </Modal>
+        }
+        {nodesTravel.length>0 &&
+          <div className='fixed h-screen w-screen top-0 left-0 z-[1]'/>
         }
     </div>
   )

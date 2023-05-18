@@ -54,7 +54,7 @@ export const depthFirstSearch = async (start: string) => {
 
 //File
 export const save = async (filename: string) => {
-  return axiosRequest('post', '/save', {...{filename}});
+  return axiosRequest('get', '/save', {...{filename}});
 };
 export const load = async (file: FormData) => {
   return axiosRequest('post', '/load', file, 'file');
