@@ -7,7 +7,7 @@ const axiosRequest = async (method: Method, url: string, params: any = null, typ
   url = `${API}${url}`
     if (type) {
       return axios({
-        ...{method, url, data: {file: params}, headers: {"Content-Type": "multipart/form-data"}}
+        ...{method, url, data: params, headers: {"Content-Type": "multipart/form-data"}}
       })
     } else {
       return axios({
