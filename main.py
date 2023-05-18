@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -104,9 +104,13 @@ async def save(filename: str):
     return graph.save(filename)
 
 
-@app.get("/load")
-async def load(filename: str):
-    return graph.load(filename)
+@app.post("/load")
+async def load(file: UploadFile):
+    try:
+        graph = Graph.load(file)
+        return graph.get_nodes_and_edges()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/export")

@@ -214,14 +214,14 @@ class Graph:
                 file.write("\n")
 
     @staticmethod
-    def load(filename: str) -> 'Graph':
+    def load(file) -> 'Graph':
         """
         Devuelve un grafo luego de cargarlo de un fichero
-        :param filename: Nombre del fichero
+        :param file: Archivo de donde proviene el grafo
         :return: Graph
         """
 
-        with open("../" + filename + ".txt", "r", encoding="utf-8") as file:
+        with open(file, "r", encoding="utf-8") as file:
             graph = Graph()
             dicts = {}
             for line in file:
