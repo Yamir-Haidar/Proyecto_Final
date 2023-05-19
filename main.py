@@ -1,16 +1,15 @@
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
 from logic.Graph import Graph
 
 graph = Graph()
-graph.insert_node("A")
+graph.insert_node("X")
 graph.insert_node("B")
-graph.insert_node("C")
+graph.insert_node("Y")
 graph.insert_node("D")
-graph.insert_edge("A", "B")
-graph.insert_edge("C", "B")
+graph.insert_edge("X", "B")
+graph.insert_edge("Y", "B")
 graph.insert_edge("D", "B")
 
 
@@ -118,7 +117,7 @@ async def load(file: UploadFile):
     try:
         content = await file.read()
         file_str = content.decode("utf-8").replace("\r\n", '\n')
-        graph = Graph.load(file_str)
+        graph.load(file_str)
         return JSONResponse(status_code=200, content=graph.get_nodes_and_edges())
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

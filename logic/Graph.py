@@ -213,8 +213,7 @@ class Graph:
                     file.write(f"({edge.node}-{edge.weight})")
                 file.write("\n")
 
-    @staticmethod
-    def load(str_file: str):
+    def load(self, str_file: str):
         """
             Devuelve un grafo luego de cargarlo de un fichero
             :param str_file: Archivo en formato str de donde proviene el grafo
@@ -238,7 +237,7 @@ class Graph:
                         graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
                 else:
                     raise Exception(f"El nodo {dicts[key][i]} no pertenece al grafo")
-        return graph
+        self.nodes = graph.nodes
 
     def export_graph(self, filename: str):
         """
