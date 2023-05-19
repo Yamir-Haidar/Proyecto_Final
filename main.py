@@ -1,8 +1,9 @@
+import os
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from logic.Graph import Graph
-
+EXTENSION_FILE = ".yaor"
 graph = Graph()
 graph.insert_node("1")
 graph.insert_node("2")
@@ -20,7 +21,6 @@ graph.insert_edge("3", "6")
 graph.insert_edge("3", "7")
 graph.insert_edge("4", "7")
 graph.insert_edge("4", "8")
-
 
 app = FastAPI()
 
@@ -117,14 +117,31 @@ async def depth_first_traversal(start: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/save")
-async def save(filename: str):
-    return graph.save(filename)
+@app.post("/save")
+async def save(path: str, name: str):
+    if not path or not name:
+        raise HTTPException(status_code=400, detail="Some data is missing")
+    # Comprobar si la ruta existe
+    if not os.path.exists(path):
+        raise HTTPException(status_code=400, detail="Path doesn't exists")
+    # Comprobar si la ruta es un directorio
+    if not os.path.isdir(path):
+        raise HTTPException(status_code=400, detail="Path is not a directory")
+    # Comprobar si el archivo ya existe
+    archivo_completo = os.path.join(path, name + EXTENSION_FILE)
+    if os.path.exists(archivo_completo):
+        raise HTTPException(status_code=400, detail="Already existing file")
+    # Crear el archivo
+    graph.save(archivo_completo)
+    # Devolver la respuesta
+    return JSONResponse(status_code=200, content="File successfully saved")
 
 
 @app.post("/load")
 async def load(file: UploadFile):
     try:
+        if not file.filename.endswith(EXTENSION_FILE):
+            raise Exception("Invalid file")
         content = await file.read()
         file_str = content.decode("utf-8").replace("\r\n", '\n')
         graph.load(file_str)

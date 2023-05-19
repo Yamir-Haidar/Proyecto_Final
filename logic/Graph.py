@@ -76,6 +76,8 @@ class Graph:
             raise Exception(f"Node {old_info} unfounded")
         if self.existing_node(new_info):
             raise Exception(f"Node {new_info} already exists")
+        if re.match(pattern=r'^[a-zA-Z0-9]+$', string=new_info) is None:
+            raise Exception(f"Invalid name {new_info}")
         node.info = new_info
 
     def update_edge(self, start: str, end: str, weight=1):
@@ -200,13 +202,14 @@ class Graph:
             if edge.node.info not in visited:
                 self._depth_first_search(edge.node, visited)
 
-    def save(self, filename: str) -> None:
+    def save(self, full_path: str) -> None:
         """
         Funcion que permite guardar el fichero en la raiz del proyecto
-        :param filename: Nombre del fichero
+        :param full_path: Ruta y nombre del fichero
         :return: None
         """
-        with open("../" + filename + ".txt", 'w') as file:
+        with open(full_path, 'w') as file:
+            file.write("@iqh2eie39(*\n")
             for node in self.nodes:
                 file.write(node.info + " ")
                 for edge in node.edges:
@@ -226,7 +229,8 @@ class Graph:
             raise Exception("Invalid file")
         try:
             for line in lines[1: len(lines)]:
-                if re.match(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line) is None:
+                if re.search(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line) is not None:
+                    r'^[a-zA-Z0-9]+$'
                     raise Exception("Invalid sequence")
                 data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
                 graph.insert_node(data[0])
@@ -247,6 +251,9 @@ class Graph:
             self.nodes = graph.nodes
         except Exception:
             raise Exception("Error reading file")
+
+    # def validate_structure(self, line):
+    #     if not re.match(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line):
 
     def export_graph(self, filename: str):
         """

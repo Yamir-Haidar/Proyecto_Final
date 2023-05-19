@@ -5,7 +5,7 @@ from logic import Edge
 
 class Node:
     def __init__(self, info: str):
-        if re.match(r'^[a-zA-Z0-9]+$', info) is None:
+        if re.match(pattern=r'^[a-zA-Z0-9]+$', string=info) is None:
             raise Exception(f"Invalid name {info}")
         self.info = info
         self.edges = []
