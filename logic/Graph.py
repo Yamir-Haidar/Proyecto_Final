@@ -234,10 +234,10 @@ class Graph:
                     if temp_node is None:
                         raise Exception(f"Node {dicts[key][i]} has not been created")
                     if temp_node not in graph.nodes:
-                        raise Exception(f"El nodo {dicts[key][i]} no pertenece al grafo")
+                        raise Exception(f"Node {dicts[key][i]} doesn't belong to the graph")
                     if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
-                        raise Exception(f"Ya existe la arista {graph.get_node(key)} ->"
-                                        f" {dicts[key][i]} con peso {dicts[key][i + 1]}")
+                        raise Exception(f"Edge {graph.get_node(key)} ->"
+                                        f" {dicts[key][i]} with weight {dicts[key][i + 1]} already exists")
                     else:
                         graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
             self.nodes = graph.nodes
