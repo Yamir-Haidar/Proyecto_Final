@@ -219,11 +219,13 @@ class Graph:
             :param str_file: Archivo en formato str de donde proviene el grafo
             :return: Graph
         """
+        lines = str_file.splitlines()
+        graph = Graph()
+        dicts = {}
+        if lines[0] != "@iqh2eie39(*":
+            raise Exception("Invalid file")
         try:
-            lines = str_file.splitlines()
-            graph = Graph()
-            dicts = {}
-            for line in lines:
+            for line in lines[1: len(lines)]:
                 data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
                 graph.insert_node(data[0])
                 node = graph.get_node(data[0])
