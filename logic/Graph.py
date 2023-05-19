@@ -213,8 +213,7 @@ class Graph:
                     file.write(f"({edge.node}-{edge.weight})")
                 file.write("\n")
 
-    @staticmethod
-    def load(str_file: str):
+    def load(self, str_file: str):
         """
             Devuelve un grafo luego de cargarlo de un fichero
             :param str_file: Archivo en formato str de donde proviene el grafo
@@ -230,15 +229,17 @@ class Graph:
             dicts[node.info] = data[1:len(data)]
         for key in dicts:
             for i in range(0, len(dicts[key]), 2):
-                if graph.get_node(dicts[key][i]) in graph.nodes:
-                    if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
-                        raise Exception(f"Ya existe la arista {graph.get_node(key)} ->"
-                                        f" {dicts[key][i]} con peso {dicts[key][i + 1]}")
-                    else:
-                        graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
-                else:
+                temp_node = graph.get_node(dicts[key][i])
+                if temp_node is None:
+                    raise Exception(f"Node {dicts[key][i]} has not been created")
+                if temp_node not in graph.nodes:
                     raise Exception(f"El nodo {dicts[key][i]} no pertenece al grafo")
-        return graph
+                if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
+                    raise Exception(f"Ya existe la arista {graph.get_node(key)} ->"
+                                    f" {dicts[key][i]} con peso {dicts[key][i + 1]}")
+                else:
+                    graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
+        self.nodes = graph.nodes
 
     def export_graph(self, filename: str):
         """
