@@ -219,27 +219,30 @@ class Graph:
             :param str_file: Archivo en formato str de donde proviene el grafo
             :return: Graph
         """
-        lines = str_file.splitlines()
-        graph = Graph()
-        dicts = {}
-        for line in lines:
-            data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
-            graph.insert_node(data[0])
-            node = graph.get_node(data[0])
-            dicts[node.info] = data[1:len(data)]
-        for key in dicts:
-            for i in range(0, len(dicts[key]), 2):
-                temp_node = graph.get_node(dicts[key][i])
-                if temp_node is None:
-                    raise Exception(f"Node {dicts[key][i]} has not been created")
-                if temp_node not in graph.nodes:
-                    raise Exception(f"El nodo {dicts[key][i]} no pertenece al grafo")
-                if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
-                    raise Exception(f"Ya existe la arista {graph.get_node(key)} ->"
-                                    f" {dicts[key][i]} con peso {dicts[key][i + 1]}")
-                else:
-                    graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
-        self.nodes = graph.nodes
+        try:
+            lines = str_file.splitlines()
+            graph = Graph()
+            dicts = {}
+            for line in lines:
+                data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
+                graph.insert_node(data[0])
+                node = graph.get_node(data[0])
+                dicts[node.info] = data[1:len(data)]
+            for key in dicts:
+                for i in range(0, len(dicts[key]), 2):
+                    temp_node = graph.get_node(dicts[key][i])
+                    if temp_node is None:
+                        raise Exception(f"Node {dicts[key][i]} has not been created")
+                    if temp_node not in graph.nodes:
+                        raise Exception(f"El nodo {dicts[key][i]} no pertenece al grafo")
+                    if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
+                        raise Exception(f"Ya existe la arista {graph.get_node(key)} ->"
+                                        f" {dicts[key][i]} con peso {dicts[key][i + 1]}")
+                    else:
+                        graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
+            self.nodes = graph.nodes
+        except Exception:
+            raise Exception("Error reading file")
 
     def export_graph(self, filename: str):
         """
