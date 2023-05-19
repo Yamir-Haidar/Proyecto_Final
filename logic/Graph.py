@@ -1,6 +1,7 @@
 import base64
 import binascii
 import os
+import re
 from collections import deque
 from logic.Edge import Edge
 from logic.Node import Node
@@ -226,6 +227,8 @@ class Graph:
             raise Exception("Invalid file")
         try:
             for line in lines[1: len(lines)]:
+                if re.match(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line) is None:
+                    raise Exception("Invalid sequence")
                 data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
                 graph.insert_node(data[0])
                 node = graph.get_node(data[0])
