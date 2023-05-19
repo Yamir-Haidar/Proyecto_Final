@@ -114,15 +114,12 @@ async def save(filename: str):
 
 
 @app.post("/load")
-async def load(file: UploadFile, confirmed: bool):
+async def load(file: UploadFile):
     try:
         content = await file.read()
         file_str = content.decode("utf-8").replace("\r\n", '\n')
         graph = Graph.load(file_str)
-        if confirmed:
-            return JSONResponse(status_code=200, content=graph.get_nodes_and_edges())
-        else:
-            return JSONResponse(status_code=200, content="user_canceled")
+        return JSONResponse(status_code=200, content=graph.get_nodes_and_edges())
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
