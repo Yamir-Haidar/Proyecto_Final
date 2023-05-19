@@ -1,7 +1,7 @@
 import { Button, Form, FormInstance, Modal, Popconfirm, Upload, UploadProps } from 'antd'
 import React, { useRef, useState } from 'react'
 import { clearGraph, load, save } from '../services/apiServices';
-import { InboxOutlined, LoadingOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { InboxOutlined, LoadingOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/es/upload';
 
 interface OptionsProps {
@@ -10,6 +10,7 @@ interface OptionsProps {
 
 const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
   const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<RcFile | null>(null);
   const [currentModal, setCurrentModal] = useState<string>();
   const uploadForm = useRef<FormInstance<any>>(null);
 
@@ -40,13 +41,9 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
     
     
     beforeUpload(file) {
-      const formData = new FormData();
-      
-      formData.append('file', file as RcFile);
-      setUploading(true);
-      load(formData)
-      .then(()=>{setUploading(false)})
-      .catch(()=>{setUploading(false)})
+      if (file) {
+        setFile(file);
+      }
       return false;
     },
     onDrop(e) {
@@ -56,7 +53,15 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
 
   const handleUpload = () => {
     uploadForm.current?.validateFields()
-    .then()
+    .then(()=>{
+      const formData = new FormData();
+      formData.append('file', file as RcFile);
+      setFile(null);
+      setUploading(true);
+      load(formData)
+      .then(()=>{setUploading(false); setCurrentModal(undefined); reloadGraph()})
+      .catch(()=>{setUploading(false); setCurrentModal(undefined)})
+    })
     .catch();
   }
 
