@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -118,23 +118,17 @@ async def depth_first_traversal(start: str):
 
 
 @app.post("/save")
-async def save(path: str, name: str):
-    if not path or not name:
-        raise HTTPException(status_code=400, detail="Some data is missing")
-    # Comprobar si la ruta existe
-    if not os.path.exists(path):
-        raise HTTPException(status_code=400, detail="Path doesn't exists")
-    # Comprobar si la ruta es un directorio
-    if not os.path.isdir(path):
-        raise HTTPException(status_code=400, detail="Path is not a directory")
-    # Comprobar si el archivo ya existe
-    archivo_completo = os.path.join(path, name + EXTENSION_FILE)
-    if os.path.exists(archivo_completo):
-        raise HTTPException(status_code=400, detail="Already existing file")
-    # Crear el archivo
-    graph.save(archivo_completo)
-    # Devolver la respuesta
-    return JSONResponse(status_code=200, content="File successfully saved")
+async def save():
+    try:
+        # Crear un objeto Path que represente la ruta y el nombre de archivo en el servidor
+        ruta_archivo = Path("graph" + EXTENSION_FILE)
+        # Crear el archivo en el servidor
+        graph.save(str(ruta_archivo))
+
+        # Devolver una respuesta al frontend indicando que el archivo se ha guardado correctamente
+        return JSONResponse(content="File successfully saved")
+    except Exception as e:
+        raise Exception(str(e))
 
 
 @app.post("/load")
