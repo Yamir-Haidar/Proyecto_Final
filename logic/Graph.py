@@ -37,7 +37,7 @@ class Graph:
         node = Node(info)
         self.nodes.append(node)
 
-    def insert_edge(self, info1: str, info2: str, weight: int = 1) -> None:
+    def insert_edge(self, info1: str, info2: str, weight="1") -> None:
         """
        Inserta una arista entre dos nodos
 
@@ -154,7 +154,7 @@ class Graph:
                 break
         return node
 
-    def breadth_first_search(self, start: str) -> list:
+    def breadth_first_traversal(self, start: str) -> list:
         """
         Realiza un recorrido a lo ancho(bfs)
         :param start: Nodo inicial del recorrido
@@ -162,11 +162,10 @@ class Graph:
         """
         visited = []
         queue = deque()
-        for node in self.nodes:
-            if node.info == start:
-                queue.append(node.info)
-        if len(queue) == 0:
+        start_node = self.get_node(start)
+        if start_node is None:
             raise Exception(f"Node {start} non exists")
+        queue.append(start_node.info)
 
         while queue:
             current_node = self.get_node(queue.popleft())
@@ -176,17 +175,17 @@ class Graph:
                     queue.append(edge.node.info)
         return visited
 
-    def depth_first_search(self, start: str) -> list:
+    def depth_first_traversal(self, start: str) -> list:
         """
         Realiza un recorrido en profundidad(dfs)
         :param start: Nodo inicial del recorrido
         :return: lista de nodos que recorre en su ejecucion
         """
         visited = []
-        start = self.get_node(start)
+        start_node = self.get_node(start)
         if start is None:
             raise Exception(f"Node {start} non exists")
-        self._depth_first_search(start, visited)
+        self._depth_first_search(start_node, visited)
         return visited
 
     def _depth_first_search(self, node: Node, visited: list) -> None:
@@ -315,7 +314,7 @@ class Graph:
                                     weight = int(im)
                                     adjacent_node = next(it)
                                     graph.insert_node(adjacent_node)
-                                    graph.insert_edge(starting_node, adjacent_node, weight)
+                                    graph.insert_edge(starting_node, adjacent_node, str(weight))
                             except StopIteration:
                                 flag = True
                                 break

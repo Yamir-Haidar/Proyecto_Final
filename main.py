@@ -4,13 +4,22 @@ from fastapi.responses import JSONResponse
 from logic.Graph import Graph
 
 graph = Graph()
-graph.insert_node("X")
-graph.insert_node("B")
-graph.insert_node("Y")
-graph.insert_node("D")
-graph.insert_edge("X", "B")
-graph.insert_edge("Y", "B")
-graph.insert_edge("D", "B")
+graph.insert_node("1")
+graph.insert_node("2")
+graph.insert_node("3")
+graph.insert_node("4")
+graph.insert_node("5")
+graph.insert_node("6")
+graph.insert_node("7")
+graph.insert_node("8")
+graph.insert_edge("1", "2")
+graph.insert_edge("1", "3")
+graph.insert_edge("1", "4")
+graph.insert_edge("2", "5")
+graph.insert_edge("3", "6")
+graph.insert_edge("3", "7")
+graph.insert_edge("4", "7")
+graph.insert_edge("4", "8")
 
 
 app = FastAPI()
@@ -45,7 +54,7 @@ async def insert_node(info: str):
 
 
 @app.post("/insert_edge")
-async def insert_edge(start: str, end: str, weight=1):
+async def insert_edge(start: str, end: str, weight="1"):
     try:
         graph.insert_edge(start, end, weight)
         return JSONResponse(content={"message": "Edge inserted successfully"}, status_code=200)
@@ -66,6 +75,7 @@ async def update_node(old_info: str, new_info: str):
 async def update_edge(start: str, end: str, weight=1):
     try:
         graph.update_edge(start, end, weight)
+
         return JSONResponse(content={"message": "Edge updated successfully"}, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -89,19 +99,19 @@ async def delete_edge(start: str, end: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/bfs")
-async def breadth_first_search(start: str):
+@app.get("/bft")
+async def breadth_first_traversal(start: str):
     try:
-        result = graph.breadth_first_search(start)
+        result = graph.breadth_first_traversal(start)
         return JSONResponse(status_code=200, content=result)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/dfs")
-async def depth_first_search(start: str):
+@app.get("/dft")
+async def depth_first_traversal(start: str):
     try:
-        result = graph.depth_first_search(start)
+        result = graph.depth_first_traversal(start)
         return JSONResponse(status_code=200, content=result)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

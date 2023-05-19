@@ -44,12 +44,12 @@ export const deleteEdge = async (start: string, end: string) => {
   return axiosRequest('delete', '/delete_edge', {...{start, end}});
 };
 
-//Searchs
+//Searches
 export const breadthFirstSearch = async (start: string) => {
-  return axiosRequest('get', '/bfs', {...{start}});
+  return axiosRequest('get', '/bft', {...{start}});
 };
 export const depthFirstSearch = async (start: string) => {
-  return axiosRequest('get', '/dfs', {...{start}});
+  return axiosRequest('get', '/dft', {...{start}});
 };
 
 //File

@@ -121,16 +121,16 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
     
   }
 
-  //searchs
+  //searches
   const depthFirst = (node: IdType) => {
-    breadthFirstSearch(String(node))
+    depthFirstSearch(String(node))
     .then((data)=>{
       setNodesTravel(data.data);
     })
     .catch(()=>{});
   }
   const breadthFirst = (node: IdType) => {
-    depthFirstSearch(String(node))
+    breadthFirstSearch(String(node))
     .then((data)=>{
       setNodesTravel(data.data);
     })
