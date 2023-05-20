@@ -230,7 +230,6 @@ class Graph:
         try:
             for line in lines[1: len(lines)]:
                 if re.search(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line) is not None:
-                    r'^[a-zA-Z0-9]+$'
                     raise Exception("Invalid sequence")
                 data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
                 graph.insert_node(data[0])

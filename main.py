@@ -1,7 +1,11 @@
+import random
+import string
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse
+
 from logic.Graph import Graph
 EXTENSION_FILE = ".yaor"
 graph = Graph()
@@ -120,15 +124,11 @@ async def depth_first_traversal(start: str):
 @app.post("/save")
 async def save():
     try:
-        # Crear un objeto Path que represente la ruta y el nombre de archivo en el servidor
-        ruta_archivo = Path("graph" + EXTENSION_FILE)
-        # Crear el archivo en el servidor
-        graph.save(str(ruta_archivo))
-
-        # Devolver una respuesta al frontend indicando que el archivo se ha guardado correctamente
-        return JSONResponse(content="File successfully saved")
+        file_dir = Path("saved_graphs/" + generate_text() + EXTENSION_FILE)
+        graph.save(str(file_dir))
+        return FileResponse(path=file_dir)
     except Exception as e:
-        raise Exception(str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/load")
@@ -152,3 +152,13 @@ async def export_graph(filename: str):
 @app.get("/import")
 async def import_graph(filename: str):
     return graph.import_graph(filename)
+
+
+def generate_random_string(length):
+    letters = string.digits + string.ascii_letters
+    return ''.join(random.choice(letters) for _ in range(length))
+
+
+def generate_text():
+    text = [generate_random_string(random.randint(5, 20))]
+    return ' '.join(text)
