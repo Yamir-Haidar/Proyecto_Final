@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react'
 import { clearGraph, load, save } from '../services/apiServices';
 import { InboxOutlined, LoadingOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/es/upload';
+import { saveAs } from 'file-saver'
 
 interface OptionsProps {
   reloadGraph: ()=>void
@@ -77,8 +78,12 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
 
   const handleExport = () => {
     save()
-    .then()
-    .catch();
+    .then((data)=>{
+        const fileData = new Blob([data.data],
+        {type: 'text/plain;charset=utf-8'});
+        saveAs(fileData, 'graph.yaor');
+    })
+    .catch(()=>{});
   }
 
   const hanldeClearGraph = () => {
