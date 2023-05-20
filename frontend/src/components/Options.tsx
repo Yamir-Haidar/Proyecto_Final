@@ -76,7 +76,7 @@ const Options: React.FC<OptionsProps> = ({reloadGraph}) => {
   }
 
   const handleExport = () => {
-    save("asd")
+    save()
     .then()
     .catch();
   }
