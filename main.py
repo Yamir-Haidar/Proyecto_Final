@@ -1,11 +1,11 @@
 import os
-import random
-import string
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 
 from logic.Graph import Graph
+from logic.utils import generate_text
+
 EXTENSION_FILE = ".yaor"
 graph = Graph()
 graph.insert_node("1")
@@ -156,13 +156,3 @@ async def export_graph(filename: str):
 @app.get("/import")
 async def import_graph(filename: str):
     return graph.import_graph(filename)
-
-
-def generate_random_string(length):
-    letters = string.digits + string.ascii_letters
-    return ''.join(random.choice(letters) for _ in range(length))
-
-
-def generate_text():
-    text = [generate_random_string(random.randint(5, 20))]
-    return ' '.join(text)

@@ -1,4 +1,6 @@
+import random
 import re
+import string
 
 
 def is_right(string, call):
@@ -17,3 +19,13 @@ def is_right(string, call):
         return True
     else:
         return False
+
+
+def generate_random_string(length):
+    stock = string.digits + string.ascii_letters
+    return ''.join(random.choice(stock) for _ in range(length))
+
+
+def generate_text():
+    text = [generate_random_string(random.randint(5, 20))]
+    return ' '.join(text)
