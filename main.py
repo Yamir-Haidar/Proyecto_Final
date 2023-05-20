@@ -125,6 +125,8 @@ async def depth_first_traversal(start: str):
 async def save():
     try:
         file_dir = Path("saved_graphs/" + generate_text() + EXTENSION_FILE)
+        if len(graph.nodes) == 0:
+            raise Exception("Nothing to save")
         graph.save(str(file_dir))
         return FileResponse(path=file_dir)
     except Exception as e:
