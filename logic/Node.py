@@ -1,12 +1,13 @@
-import re
-
 from logic import Edge
+from logic.utils import is_right
 
 
 class Node:
     def __init__(self, info: str):
-        if re.match(pattern=r'^[a-zA-Z0-9]+$', string=info) is None:
+        if not is_right(info, 2):
             raise Exception(f"Invalid name {info}")
+        if len(info) > 15:
+            raise Exception("Too long name. Max length is 15 characters")
         self.info = info
         self.edges = []
 

@@ -6,6 +6,7 @@ from collections import deque
 from logic.Edge import Edge
 from logic.Node import Node
 from logic.exceptions import UnreliableGraph, Exc
+from logic.utils import is_right
 
 
 class Graph:
@@ -229,8 +230,8 @@ class Graph:
             raise Exception("Invalid file")
         try:
             for line in lines[1: len(lines)]:
-                if re.search(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line) is not None:
-                    raise Exception("Invalid sequence")
+                if not is_right(line, 1):
+                    raise Exception("Invalid sequence: " + line)
                 data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
                 graph.insert_node(data[0])
                 node = graph.get_node(data[0])
@@ -248,8 +249,8 @@ class Graph:
                     else:
                         graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
             self.nodes = graph.nodes
-        except Exception:
-            raise Exception("Error reading file")
+        except Exception as e:
+            raise Exception("Error reading file: " + str(e))
 
     # def validate_structure(self, line):
     #     if not re.match(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line):
