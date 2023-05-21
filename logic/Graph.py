@@ -58,6 +58,8 @@ class Graph:
         node2 = self.get_node(info2)
         if node2 is None:
             raise Exception(f"Node {info2} not exists")
+        if not is_right(weight):
+            raise Exception("Invalid weight")
         edge = Edge(node2, weight)
         if edge in node1.edges:
             raise Exception(f"Edge {info1} -> {info2} already exists")
@@ -88,6 +90,8 @@ class Graph:
         node2 = self.get_node(end)
         if node2 is None or node2 not in self.nodes:
             raise Exception(f"Node {end} not exists")
+        if not is_right(weight):
+            raise Exception("Invalid weight")
         edge = Edge(node2, weight)
         if edge in node1.edges:
             if node1.get_edge(end).weight == weight:

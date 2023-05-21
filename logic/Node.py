@@ -4,7 +4,7 @@ from logic.utils import is_right
 
 class Node:
     def __init__(self, info: str):
-        if not is_right(info, 2):
+        if not is_right(info):
             raise Exception(f"Invalid name {info}")
         if len(info) > 15:
             raise Exception("Too long name. Max length is 15 characters")
@@ -15,7 +15,7 @@ class Node:
         return self.info
 
     def __eq__(self, other) -> bool:
-        return self.info == other.info if type(other) is not str else False
+        return self.info == other.info if type(other) is Node else False
 
     def get_edge(self, info) -> Edge:
         it = iter(self.edges)

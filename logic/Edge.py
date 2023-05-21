@@ -11,4 +11,4 @@ class Edge:
         return f"{self.node},{self.weight}"
 
     def __eq__(self, other: 'Edge'):
-        return self.node == other.node if type(other) is not str else False
+        return self.node == other.node if type(other) is Edge else False

@@ -3,7 +3,7 @@ import re
 import string
 
 
-def is_right(string, call):
+def is_right(string, call=0):
     """
     Función que valida si un string sigue el patrón especificado.
     :param call: Lugar desde donde se llama para determinar el patron
