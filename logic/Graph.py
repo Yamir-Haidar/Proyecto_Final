@@ -5,7 +5,7 @@ import re
 from collections import deque
 from logic.Edge import Edge
 from logic.Node import Node
-from logic.exceptions import UnreliableGraph, Exc
+from logic.exceptions import UnreliableGraph
 from logic.utils import is_right
 
 
@@ -34,7 +34,7 @@ class Graph:
                 :return: (False) En caso de no poder insertar el nodo dado que ya existia
                 """
         if self.existing_node(info):
-            raise Exc("existing_node", [info])
+            raise Exception(f"Node {info} already exists")
         node = Node(info)
         self.nodes.append(node)
 
