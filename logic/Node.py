@@ -5,7 +5,7 @@ from logic.utils import is_right
 class Node:
     def __init__(self, info: str):
         if not is_right(info):
-            raise Exception(f"Invalid name {info}")
+            raise Exception(f"Invalid name \"{info}\"")
         if len(info) > 15:
             raise Exception("Too long name. Max length is 15 characters")
         self.info = info
