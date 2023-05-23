@@ -1,4 +1,4 @@
-from logic import Node
+from backend import Node
 
 
 class Edge:

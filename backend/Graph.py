@@ -3,10 +3,10 @@ import binascii
 import os
 import re
 from collections import deque
-from logic.Edge import Edge
-from logic.Node import Node
-from logic.exceptions import UnreliableGraph
-from logic.utils import is_right
+from backend.Edge import Edge
+from backend.Node import Node
+from backend.exceptions import UnreliableGraph
+from backend.utils import is_right
 
 
 class Graph:
@@ -77,6 +77,8 @@ class Graph:
         node = self.get_node(old_info)
         if node is None:
             raise Exception(f"Node {old_info} unfounded")
+        if self.get_node(old_info) == self.get_node(new_info):
+            raise Exception("New info is equal to the previous one")
         if self.existing_node(new_info):
             raise Exception(f"Node {new_info} already exists")
         if re.match(pattern=r'^[a-zA-Z0-9]+$', string=new_info) is None:
@@ -90,11 +92,11 @@ class Graph:
         node2 = self.get_node(end)
         if node2 is None or node2 not in self.nodes:
             raise Exception(f"Node {end} not exists")
-        if not is_right(weight):
-            raise Exception("Invalid weight")
         edge = Edge(node2, weight)
         if edge in node1.edges:
-            if node1.get_edge(end).weight == weight:
+            if not is_right(weight):
+                raise Exception("Invalid weight")
+            elif node1.get_edge(end).weight == weight:
                 raise Exception(f"Edge {start} -> {end} with weight {weight} already exists")
             else:
                 node1.get_edge(end).weight = weight

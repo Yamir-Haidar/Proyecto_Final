@@ -3,10 +3,12 @@ from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 
-from logic.Graph import Graph
-from logic.utils import generate_text
+from backend.Graph import Graph
+from backend.utils import generate_text
 
+DIRECTORY = "saved_graphs/"
 EXTENSION_FILE = ".yaor"
+
 graph = Graph()
 graph.insert_node("1")
 graph.insert_node("2")
@@ -97,7 +99,7 @@ async def delete_node(info: str):
 async def delete_edge(start: str, end: str):
     try:
         graph.delete_edge(start, end)
-        return JSONResponse(content={"message": "Edge deleted successfully"}, status_code=200)
+        return JSONResponse(content={"message": "Edge deleted successfully"})
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -106,7 +108,7 @@ async def delete_edge(start: str, end: str):
 async def breadth_first_traversal(start: str):
     try:
         result = graph.breadth_first_traversal(start)
-        return JSONResponse(status_code=200, content=result)
+        return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -115,7 +117,7 @@ async def breadth_first_traversal(start: str):
 async def depth_first_traversal(start: str):
     try:
         result = graph.depth_first_traversal(start)
-        return JSONResponse(status_code=200, content=result)
+        return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -123,12 +125,11 @@ async def depth_first_traversal(start: str):
 @app.post("/save")
 async def save():
     try:
-        directory = "saved_graphs/"
-        file_dir = directory + generate_text() + EXTENSION_FILE
+        file_dir = DIRECTORY + generate_text() + EXTENSION_FILE
         if len(graph.nodes) == 0:
             raise Exception("Nothing to save")
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        if not os.path.exists(DIRECTORY):
+            os.makedirs(DIRECTORY)
         graph.save(str(file_dir))
         return FileResponse(path=file_dir)
     except Exception as e:
@@ -143,7 +144,7 @@ async def load(file: UploadFile):
         content = await file.read()
         file_str = content.decode("utf-8").replace("\r\n", '\n')
         graph.load(file_str)
-        return JSONResponse(status_code=200, content=graph.get_nodes_and_edges())
+        return JSONResponse(content=graph.get_nodes_and_edges())
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

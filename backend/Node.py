@@ -1,5 +1,5 @@
-from logic import Edge
-from logic.utils import is_right
+from backend import Edge
+from backend.utils import is_right
 
 
 class Node:
