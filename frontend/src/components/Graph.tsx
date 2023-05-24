@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react'
 import Graph, { Options, graphData, graphEvents } from "react-graph-vis";
 import FloatOptions, { FloatOptionsProps } from './FloatOptions';
-import { Form, FormInstance, Input, Modal } from 'antd'
+import { Form, FormInstance, Input, InputRef, Modal } from 'antd'
 import { IdType, Position } from 'vis';
 import {  breadthFirstSearch, deleteEdge, deleteNode, depthFirstSearch, insertEdge, insertNode, updateEdge, updateNode } from '../services/apiServices';
 import { color } from '../settings';
@@ -17,6 +17,9 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
   const formUpdateNode = useRef<FormInstance<any>>(null);
   const formUpdateEdge = useRef<FormInstance<any>>(null);
   const insertForm = useRef<FormInstance<any>>(null);
+  const insertInput = useRef<InputRef>(null);
+  const updateEdgeInput = useRef<InputRef>(null);
+  const updateNodeInput = useRef<InputRef>(null);
   const [currentModal, setCurrentModal] = useState<string>();
   const [travel, setTravel] = useState<string>();
   const [nodesTravel, setNodesTravel] = useState<string[]>([]);
@@ -48,6 +51,9 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
         case 'update_node':
           handleUpdateNode();
           break;
+          case 'insert_node':
+            handleInsert();
+            break;
         case 'update_edge':
           handleUpdateEdge();
           break;
@@ -225,6 +231,22 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
     }
   }
 
+  useEffect(() => {
+    switch (currentModal) {
+      case 'insert_node':
+        insertInput.current?.focus();
+        break;
+      case 'update_node':
+        updateNodeInput.current?.focus();
+        break;
+      case 'update_edge':
+        updateEdgeInput.current?.focus();
+        break;
+    }
+    
+  }, [currentModal])
+  
+
   const tickNode = (node: string, x: number, y: number) => {
     tickNodeAux(node, x, y, 3);
   }
@@ -312,7 +334,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
                     {required: true, message: 'Select the info!'}
                   ]}
                 >
-                  <Input/>
+                  <Input ref={updateNodeInput}/>
                 </Form.Item>
               </Form>
           </Modal>
@@ -336,7 +358,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
                     {required: true, message: 'Input the weight!'}
                   ]}
                 >
-                  <Input/>
+                  <Input ref={updateEdgeInput}/>
                 </Form.Item>
               </Form>
           </Modal>
@@ -360,7 +382,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
                   {required: true, message: 'Select the info!'}
                 ]}
               >
-                <Input/>
+                <Input ref={insertInput}/>
               </Form.Item>
             </Form>
           </Modal>
