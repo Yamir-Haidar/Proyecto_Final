@@ -227,6 +227,7 @@ class Graph:
         """
         lines = str_file.splitlines()
         dicts = {}
+        graph = Graph()
         if lines[0] != "@iqh2eie39(*":
             raise Exception("Invalid file")
         try:
@@ -234,21 +235,21 @@ class Graph:
                 if not is_right(line, 1):
                     raise Exception("Invalid sequence: " + line)
                 data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
-                self.insert_node(data[0])
-                node = self.get_node(data[0])
+                graph.insert_node(data[0])
+                node = graph.get_node(data[0])
                 dicts[node.info] = data[1:len(data)]
             for key in dicts:
                 for i in range(0, len(dicts[key]), 2):
-                    temp_node = self.get_node(dicts[key][i])
+                    temp_node = graph.get_node(dicts[key][i])
                     if temp_node is None:
                         raise Exception(f"Node {dicts[key][i]} has not been created")
-                    if temp_node not in self.nodes:
+                    if temp_node not in graph.nodes:
                         raise Exception(f"Node {dicts[key][i]} doesn't belong to the graph")
-                    if Edge(dicts[key][i], dicts[key][i + 1]) in self.get_node(key).edges:
-                        raise Exception(f"Edge {self.get_node(key)} ->"
+                    if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
+                        raise Exception(f"Edge {graph.get_node(key)} ->"
                                         f" {dicts[key][i]} with weight {dicts[key][i + 1]} already exists")
                     else:
-                        self.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
-            self.nodes = self.nodes
-        except Exception:
-            raise Exception("Error reading file")
+                        graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
+            self.nodes = graph.nodes
+        except Exception as e:
+            raise Exception("Error reading file, ", e)
