@@ -18,6 +18,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
   const formUpdateEdge = useRef<FormInstance<any>>(null);
   const insertForm = useRef<FormInstance<any>>(null);
   const [currentModal, setCurrentModal] = useState<string>();
+  const [travel, setTravel] = useState<string>();
   const [nodesTravel, setNodesTravel] = useState<string[]>([]);
   const [canvasPos, setCanvasPos] = useState<Position>({x: 0, y: 0});
 
@@ -147,6 +148,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
   const depthFirst = (node: IdType) => {
     depthFirstSearch(String(node))
     .then((data)=>{
+      setTravel("depth first");
       setNodesTravel(data.data);
     })
     .catch(()=>{});
@@ -154,6 +156,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
   const breadthFirst = (node: IdType) => {
     breadthFirstSearch(String(node))
     .then((data)=>{
+      setTravel("breadth first");
       setNodesTravel(data.data);
     })
     .catch(()=>{});
@@ -209,7 +212,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
     } else {
       if (nodesTravel.length>0) {
         Modal.info({
-          title: 'travel',
+          title: travel,
           centered: true,
           onOk: ()=>setNodesTravel([]),
           content: (
