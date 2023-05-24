@@ -1,4 +1,3 @@
-import base64
 import re
 from collections import deque
 from backend.Edge import Edge
@@ -253,69 +252,3 @@ class Graph:
             self.nodes = self.nodes
         except Exception:
             raise Exception("Error reading file")
-
-    # def validate_structure(self, line):
-    #     if not re.match(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line):
-
-    def export_graph(self, full_path: str):
-        """
-        Exporta un grafo a un archivo txt
-        :param full_path: El nombre del archivo de texto
-        :return:
-        """
-        with open(full_path, 'w') as file:
-            file.write(base64.b64encode("@iqh2eie39(*".encode("utf-8")).decode('utf-8'))
-            file.write('\n')
-            it = iter(self.nodes)
-            while True:
-                try:
-                    starting_node = next(it)
-                    line: str
-                    line = "".join([starting_node.info, " "])
-                    it2 = iter(starting_node.edges)
-                    while True:
-                        try:
-                            edge = next(it2)
-                            node_adjacent = edge.node
-                            line = "".join([line, "(", node_adjacent.info, "-", str(edge.weight), ")"])
-                        except StopIteration:
-                            file.write(f"{base64.b64encode(line.encode('utf-8')).decode('utf-8')}\n")
-                            break
-                except StopIteration:
-                    break
-
-    def import_graph(self, str_file: str):
-        """
-        Importa un grafo (exportado a un fichero texto previamente) dado su direccion y nombre
-        -En caso de no encontrarse el fichero en la direccion y nombre especificados lanzara la excepcion
-        FileNotFoundError
-        -En caso de importar un fichero que no haya sido exportado por el metodo export_graph() o que no contenga la
-        estructura definida lanzara la excepcion UnreliableGraph que indica que el grafo que se desea importar no
-        es confiable
-        :param str_file: El nombre del archivo de texto
-        :return:
-        """
-
-        lines = str_file.splitlines()
-
-        decode_line = base64.b64decode(lines[0]).decode('utf-8')
-
-        if decode_line == "@iqh2eie39(*":
-            for line in lines[1: len(lines)]:
-                decode_info = base64.b64decode(line).decode('utf-8')
-                info = deque(decode_info.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
-                it = iter(info)
-                starting_node = next(it)
-                self.insert_node(starting_node)
-                while True:
-                    try:
-                        im = next(it)
-                        adjacent_node = next(it)
-                        weight = int(im)
-                        self.insert_node(adjacent_node)
-                        self.insert_edge(starting_node, adjacent_node, str(weight))
-                    except StopIteration:
-                        break
-
-        else:
-            raise Exception("Invalid file")
