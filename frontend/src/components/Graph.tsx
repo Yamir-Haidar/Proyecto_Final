@@ -19,6 +19,8 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
   const insertForm = useRef<FormInstance<any>>(null);
   const [currentModal, setCurrentModal] = useState<string>();
   const [nodesTravel, setNodesTravel] = useState<string[]>([]);
+  const [canvasPos, setCanvasPos] = useState<Position>({x: 0, y: 0});
+
   const [floatOptions, setFloatOptions] = useState<FloatOptionsProps>(
     {x: 0, y: 0, visible: false, options:[]}
   );
@@ -61,7 +63,27 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
       const info = insertForm.current?.getFieldValue('node_info');
       insertNode(info)
       .then(()=>{
-        reloadGraph();
+        setGraph((graph)=>{
+          const newNodes = [...graph.nodes]
+          newNodes.push({
+            id: info, 
+            label: info, 
+            shadow: info, 
+            shape: 'circle', 
+            x: canvasPos.x,
+            y: canvasPos.y,
+            color: {
+                background: color.node, 
+                border: darken(color.node, 20),
+                highlight: {
+                    background: lighten(color.node, 20),
+                    border: color.node
+                }  
+            } 
+          })
+          console.log("inserting ", info, floatOptions.x, floatOptions.y)
+          return {nodes: newNodes, edges: graph.edges};
+        });
       })
       .catch(()=>{});
       hideModal();
@@ -214,6 +236,7 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
   const events: graphEvents = {
     oncontext: function(event: any) {
       event.event.preventDefault()
+      setCanvasPos({x: event.pointer.canvas.x, y: event.pointer.canvas.y})
       const {x, y} = event.pointer.DOM;
       if (graphRef.current) {
         const node = graphRef.current.Network.getNodeAt({x: x, y: y});
@@ -264,7 +287,9 @@ const MainGraph: React.FC<MainGraphProps> = ({graph, setGraph, reloadGraph}) => 
             //  if you want access to vis.js network api you can set the state in a parent component using this property
           }}
         />
-        <FloatOptions {...floatOptions} onCancel={()=>setFloatOptions({visible: false, x: 0, y: 0, options: []})}/>
+        <FloatOptions {...floatOptions} onCancel={()=>setFloatOptions((floatOptions)=>{
+          return{...floatOptions, visible: false}
+        })}/>
         {currentModal === 'update_node' &&
           <Modal
           title='Update node'
