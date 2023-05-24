@@ -27,5 +27,5 @@ def generate_random_string(length):
 
 
 def generate_text():
-    text = [generate_random_string(random.randint(5, 20))]
-    return ' '.join(text)
+    return  generate_random_string(random.randint(5, 20))
+   
