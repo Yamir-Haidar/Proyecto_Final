@@ -150,10 +150,27 @@ async def load(file: UploadFile):
 
 
 @app.post("/export")
-async def export_graph(filename: str):
-    return graph.export_graph(filename)
+async def export_graph():
+    try:
+        file_dir = DIRECTORY + generate_text() + EXTENSION_FILE
+        if len(graph.nodes) == 0:
+            raise Exception("Nothing to save")
+        if not os.path.exists(DIRECTORY):
+            os.makedirs(DIRECTORY)
+        graph.export_graph(str(file_dir))
+        return FileResponse(path=file_dir)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/import")
-async def import_graph(filename: str):
-    return graph.import_graph(filename)
+async def import_graph(file: UploadFile):
+    try:
+        if not file.filename.endswith(EXTENSION_FILE):
+            raise Exception("Invalid file")
+        content = await file.read()
+        file_str = content.decode("utf-8").replace("\r\n", '\n')
+        graph.import_graph(file_str)
+        return JSONResponse(content=graph.get_nodes_and_edges())
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

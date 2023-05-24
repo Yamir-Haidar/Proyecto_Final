@@ -1,11 +1,8 @@
 import base64
-import binascii
-import os
 import re
 from collections import deque
 from backend.Edge import Edge
 from backend.Node import Node
-from backend.exceptions import UnreliableGraph
 from backend.utils import is_right
 
 
@@ -230,7 +227,6 @@ class Graph:
             :return: Graph
         """
         lines = str_file.splitlines()
-        graph = Graph()
         dicts = {}
         if lines[0] != "@iqh2eie39(*":
             raise Exception("Invalid file")
@@ -239,60 +235,56 @@ class Graph:
                 if not is_right(line, 1):
                     raise Exception("Invalid sequence: " + line)
                 data = list(line.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
-                graph.insert_node(data[0])
-                node = graph.get_node(data[0])
+                self.insert_node(data[0])
+                node = self.get_node(data[0])
                 dicts[node.info] = data[1:len(data)]
             for key in dicts:
                 for i in range(0, len(dicts[key]), 2):
-                    temp_node = graph.get_node(dicts[key][i])
+                    temp_node = self.get_node(dicts[key][i])
                     if temp_node is None:
                         raise Exception(f"Node {dicts[key][i]} has not been created")
-                    if temp_node not in graph.nodes:
+                    if temp_node not in self.nodes:
                         raise Exception(f"Node {dicts[key][i]} doesn't belong to the graph")
-                    if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
-                        raise Exception(f"Edge {graph.get_node(key)} ->"
+                    if Edge(dicts[key][i], dicts[key][i + 1]) in self.get_node(key).edges:
+                        raise Exception(f"Edge {self.get_node(key)} ->"
                                         f" {dicts[key][i]} with weight {dicts[key][i + 1]} already exists")
                     else:
-                        graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
-            self.nodes = graph.nodes
-        except Exception as e:
-            raise Exception("Error reading file: " + str(e))
+                        self.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
+            self.nodes = self.nodes
+        except Exception:
+            raise Exception("Error reading file")
 
     # def validate_structure(self, line):
     #     if not re.match(pattern=r'^[A-Za-z]+\s(\([A-Za-z]+-[0-9]+\))*$', string=line):
 
-    def export_graph(self, filename: str):
+    def export_graph(self, full_path: str):
         """
         Exporta un grafo a un archivo txt
-        :param filename: El nombre del archivo de texto
+        :param full_path: El nombre del archivo de texto
         :return:
         """
-        os.makedirs("../", exist_ok=True)
-        with open("../" + filename + ".txt", 'w') as file:
-            file.write(base64.b64encode("python_project directed_graph".encode("utf-8")).decode('utf-8'))
+        with open(full_path, 'w') as file:
+            file.write(base64.b64encode("@iqh2eie39(*".encode("utf-8")).decode('utf-8'))
             file.write('\n')
             it = iter(self.nodes)
             while True:
                 try:
                     starting_node = next(it)
                     line: str
-                    line = "".join([starting_node.info])
+                    line = "".join([starting_node.info, " "])
                     it2 = iter(starting_node.edges)
                     while True:
                         try:
                             edge = next(it2)
                             node_adjacent = edge.node
-                            line = "".join([line, " , ", str(edge.weight), " , ", node_adjacent.info])
+                            line = "".join([line, "(", node_adjacent.info, "-", str(edge.weight), ")"])
                         except StopIteration:
                             file.write(f"{base64.b64encode(line.encode('utf-8')).decode('utf-8')}\n")
                             break
                 except StopIteration:
                     break
-        os.chmod("../" + filename + ".txt", 0o444)
 
-    @staticmethod
-    def import_graph(filename: str):
-
+    def import_graph(self, str_file: str):
         """
         Importa un grafo (exportado a un fichero texto previamente) dado su direccion y nombre
         -En caso de no encontrarse el fichero en la direccion y nombre especificados lanzara la excepcion
@@ -300,38 +292,30 @@ class Graph:
         -En caso de importar un fichero que no haya sido exportado por el metodo export_graph() o que no contenga la
         estructura definida lanzara la excepcion UnreliableGraph que indica que el grafo que se desea importar no
         es confiable
-        :param filename: El nombre del archivo de texto
+        :param str_file: El nombre del archivo de texto
         :return:
         """
-        graph = Graph()
-        try:
-            with open("../" + filename + ".txt", 'r') as file:
-                flag = True
-                line = file.readline()
-                decode_line = base64.b64decode(line).decode('utf-8')
-                if decode_line == "python_project directed_graph":
-                    while line:
-                        line = file.readline()
-                        decode_line = base64.b64decode(line).decode('utf-8')
-                        info: deque = deque(decode_line.split(" , "))
-                        it = iter(info)
-                        starting_node: str
-                        while True:
-                            try:
-                                if flag:
-                                    starting_node = next(it)
-                                    graph.insert_node(starting_node)
-                                    flag = False
-                                else:
-                                    im = next(it)
-                                    weight = int(im)
-                                    adjacent_node = next(it)
-                                    graph.insert_node(adjacent_node)
-                                    graph.insert_edge(starting_node, adjacent_node, str(weight))
-                            except StopIteration:
-                                flag = True
-                                break
-        except binascii.Error:
-            raise UnreliableGraph
-        except FileNotFoundError:
-            raise FileNotFoundError
+
+        lines = str_file.splitlines()
+
+        decode_line = base64.b64decode(lines[0]).decode('utf-8')
+
+        if decode_line == "@iqh2eie39(*":
+            for line in lines[1: len(lines)]:
+                decode_info = base64.b64decode(line).decode('utf-8')
+                info = deque(decode_info.replace("(", " ").replace(")", " ").replace("-", "  ").strip("  ").split())
+                it = iter(info)
+                starting_node = next(it)
+                self.insert_node(starting_node)
+                while True:
+                    try:
+                        im = next(it)
+                        adjacent_node = next(it)
+                        weight = int(im)
+                        self.insert_node(adjacent_node)
+                        self.insert_edge(starting_node, adjacent_node, str(weight))
+                    except StopIteration:
+                        break
+
+        else:
+            raise Exception("Invalid file")
