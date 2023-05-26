@@ -238,18 +238,20 @@ class Graph:
                 graph.insert_node(data[0])
                 node = graph.get_node(data[0])
                 dicts[node.info] = data[1:len(data)]
-            for key in dicts:
-                for i in range(0, len(dicts[key]), 2):
-                    temp_node = graph.get_node(dicts[key][i])
-                    if temp_node is None:
-                        raise Exception(f"Node {dicts[key][i]} has not been created")
-                    if temp_node not in graph.nodes:
-                        raise Exception(f"Node {dicts[key][i]} doesn't belong to the graph")
-                    if Edge(dicts[key][i], dicts[key][i + 1]) in graph.get_node(key).edges:
-                        raise Exception(f"Edge {graph.get_node(key)} ->"
-                                        f" {dicts[key][i]} with weight {dicts[key][i + 1]} already exists")
+            for start_node in dicts:
+                for i in range(0, len(dicts[start_node]), 2):
+                    end_node = graph.get_node(dicts[start_node][i])
+                    weight = str(dicts[start_node][i + 1])
+                    if end_node is None:
+                        raise Exception(f"Node {dicts[start_node][i]} has not been created")
+                    if end_node not in graph.nodes:
+                        raise Exception(f"Node {dicts[start_node][i]} doesn't belong to the graph")
+                    edge = Edge(end_node, weight)
+                    if edge in graph.get_node(start_node).edges:
+                        raise Exception(f"Edge {str(start_node)} -> {str(end_node)} "
+                                        f"with weight {weight} already exists")
                     else:
-                        graph.get_node(key).insert_edge(Edge(Node(dicts[key][i]), dicts[key][i + 1]))
+                        graph.get_node(start_node).insert_edge(edge)
             self.nodes = graph.nodes
         except Exception as e:
             raise Exception("Error reading file, ", e)
